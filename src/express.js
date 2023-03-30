@@ -1,4 +1,4 @@
-import { debug } from './index.js'
+import { debug } from './main.js'
 
 export default (title = 'REST') => (req, res, next) => {
   req.port = res.socket.localPort
