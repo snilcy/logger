@@ -1,9 +1,9 @@
-import { debug } from './main.js'
+import logger from './main.js'
 
 export default (title = 'REST') => (req, res, next) => {
   req.port = res.socket.localPort
 
-  debug(title, [
+  logger.debug(title, [
     req.method, [
       req.protocol,
       '://',
