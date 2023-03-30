@@ -1,6 +1,6 @@
 import logger from './main.js'
 
-export default (title = 'REST') => (req, res, next) => {
+export const express = (title = 'REST') => (req, res, next) => {
   req.port = res.socket.localPort
 
   logger.debug(title, [

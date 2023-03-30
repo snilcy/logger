@@ -1,2 +1,6 @@
-export * from './main.js'
-export * from './express.js'
+import logger from './main.js'
+import { express } from './express.js'
+
+logger.express = express
+
+export default logger
