@@ -8,7 +8,7 @@ const logger = new Logger({
       // prefix: '',
       // indent: 5
       // color: true
-    })
+    }),
   ],
 })
 

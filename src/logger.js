@@ -1,13 +1,12 @@
 import { LoggerLevel } from './const.js'
 
 export class Logger {
-  options = {}
   disabled = false
   namespace = []
 
   constructor(options = {}) {
-    this.options = options
-    this.namespace = [this.options.namespace]
+    this.directions = options.directions || []
+    this.namespace = [options.namespace]
       .filter(Boolean)
       .flat(3)
   }
@@ -17,7 +16,7 @@ export class Logger {
       return
     }
 
-    this.options.directions.forEach((direction) => {
+    this.directions.forEach((direction) => {
       direction.act({
         level,
         text,
@@ -27,9 +26,10 @@ export class Logger {
   }
 
   ns(value) {
-    const options = this.options
-    options.namespace = this.namespace.concat(value)
-    return new Logger(options)
+    return new Logger({
+      directions: this.directions,
+      namespace: this.namespace.concat(value),
+    })
   }
 
 

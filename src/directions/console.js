@@ -6,7 +6,7 @@ export class ConsoleDirection extends LoggerDirection {
   constructor(options = {}) {
     super()
     this.prefix = options.prefix ?? '->'
-    this.indent = options.indent ?? 3
+    this.indent = options.indent ?? 2
     this.color = options.color ?? true
     this.format = options.format
   }
@@ -18,7 +18,7 @@ export class ConsoleDirection extends LoggerDirection {
 
     const { level, text, namespace } = body
     const colorize = this.color ? LoggerColorMap[level] : (a) => a
-    const indent = ' '.repeat(this.indent * Math.max((namespace.length - 1), 0))
+    const indent = ' '.repeat(this.indent * namespace.length)
 
     return colorize(
       [
@@ -41,6 +41,7 @@ export class ConsoleDirection extends LoggerDirection {
 
   act(body) {
     const content = this.#format(body)
+    console.log(content)
     console.log(content)
   }
 }
