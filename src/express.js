@@ -1,18 +1,25 @@
-import logger from './main.js'
+import { Logger, ConsoleDirection } from './index.js'
 
-export const express = (title = 'REST') => (req, res, next) => {
-  req.port = res.socket.localPort
+export const express = (title = 'REST') => {
+  const logger = new Logger({
+    directions: [ new ConsoleDirection() ],
+    namespace: [title]
+  })
 
-  logger.debug(title, [
-    req.method, [
-      req.protocol,
-      '://',
-      req.hostname,
-      ':',
-      req.port,
-      req.originalUrl
-    ].join(''), req.body,
-  ])
+  return (req, res, next) => {
+    req.port = res.socket.localPort
 
-  next()
+    logger.debug([
+      req.method, [
+        req.protocol,
+        '://',
+        req.hostname,
+        ':',
+        req.port,
+        req.originalUrl
+      ].join(''), req.body,
+    ])
+
+    next()
+  }
 }

@@ -1,24 +1,25 @@
 {
   "name": "@snilcy/logger",
-  "version": "1.1.5",
+  "version": "2.0.0",
   "description": "",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon ./test/express.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chalk": "^5.2.0",
-    "winston": "^3.8.2"
+    "chalk": "^5.2.0"
   },
   "devDependencies": {
-    "eslint": "^8.37.0",
     "@snilcy/eslint-config": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^8.37.0",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.22",
     "typescript": "^5.0.2"
   }
 }
