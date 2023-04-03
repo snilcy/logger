@@ -42,6 +42,5 @@ export class ConsoleDirection extends LoggerDirection {
   act(body) {
     const content = this.#format(body)
     console.log(content)
-    console.log(content)
   }
 }

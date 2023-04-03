@@ -33,23 +33,23 @@ export class Logger {
   }
 
 
-  log(level, text) {
-    this.#message({ level, text })
+  log(level, ...args) {
+    this.#message({ level, text: args })
   }
 
-  debug(text) {
-    this.#message({ level: LoggerLevel.DEBUG, text })
+  debug(...args) {
+    this.#message({ level: LoggerLevel.DEBUG, text: args })
   }
 
-  info(text) {
-    this.#message({ level: LoggerLevel.INFO, text })
+  info(...args) {
+    this.#message({ level: LoggerLevel.INFO, text: args })
   }
 
-  warn(text) {
-    this.#message({ level: LoggerLevel.WARN, text })
+  warn(...args) {
+    this.#message({ level: LoggerLevel.WARN, text: args })
   }
 
-  error(text){
-    this.#message({ level: LoggerLevel.ERROR, text })
+  error(...args){
+    this.#message({ level: LoggerLevel.ERROR, text: args })
   }
 }

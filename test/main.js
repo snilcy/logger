@@ -13,6 +13,7 @@ const logger = new Logger({
 })
 
 logger.debug('debug')
+logger.debug('debug', {name: 'JR'})
 logger.info('info')
 logger.warn('warn')
 logger.error('error')
