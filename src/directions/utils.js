@@ -5,7 +5,7 @@ export const stringify = (data) => {
 
   if (typeof data === 'object') {
     if (Object.keys(data).length) {
-      return JSON.stringify(data)
+      return JSON.stringify(data, null, '  ')
     }
     return ''
   }
