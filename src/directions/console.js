@@ -11,9 +11,10 @@ export class ConsoleDirection extends LoggerDirection {
     super()
     this.prefix = options.prefix ?? '->'
     // this.indent = options.indent ?? 2
-    this.color = options.color ?? true
-    this.oneline = options.oneline ?? false
+    this.color = options.color
+    this.oneline = options.oneline
     this.format = options.format
+    this.deep = options.deep
   }
 
   #format(body) {
@@ -31,6 +32,7 @@ export class ConsoleDirection extends LoggerDirection {
       ConsoleDirection.stringify(text, {
         color: this.color,
         oneline: this.oneline,
+        maxDeep: this.deep,
       }),
     ]
       .filter(Boolean)
@@ -116,6 +118,15 @@ export class ConsoleDirection extends LoggerDirection {
       number: (num) => chalk.blue(num),
       undefined: (und) => chalk.red(und),
       string: (str) => chalk.green(`'${str}'`),
+      function: (fn) => {
+        const result = [fn.name]
+
+        if (Object.getPrototypeOf(fn)) {
+          result.push(Object.getPrototypeOf(fn).name)
+        }
+
+        return chalk.cyan(result.filter(Boolean).join(' < '))
+      },
     }
 
     if (Array.isArray(data)) {
@@ -128,6 +139,6 @@ export class ConsoleDirection extends LoggerDirection {
       return TypeHandler[type](data)
     }
 
-    return data
+    return Object.prototype.toString.call(data)
   }
 }
