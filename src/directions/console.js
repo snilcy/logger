@@ -76,7 +76,7 @@ export class ConsoleDirection extends LoggerDirection {
           valueKeys.length ?
             chalk.magenta([
               valueConstructor === 'Object' ? '' : valueConstructor,
-              ' { ',
+              '{ ',
               valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
               ' }',
             ].join('')) :
@@ -122,7 +122,7 @@ export class ConsoleDirection extends LoggerDirection {
       undefined: (und) => chalk.red(und),
       string: (str) => chalk.green(`'${str}'`),
       function: (fn) => {
-        const result = [fn.name || '(anonymous)]']
+        const result = [fn.name || '(anonymous)']
 
         if (Object.getPrototypeOf(fn)) {
           result.push(Object.getPrototypeOf(fn).name)
