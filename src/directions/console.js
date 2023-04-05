@@ -68,14 +68,15 @@ export class ConsoleDirection extends LoggerDirection {
         for (const key of keys) {
           const value = obj[key]
           const valueKeys = Object.keys(value || {})
+          const valueConstructor = typeof value === 'object' ? value.constructor.name : ''
 
-          const resValue =
-          deep > maxDeep &&
+          const resValue = deep > maxDeep &&
           typeof value === 'object' &&
           value !== null &&
           valueKeys.length ?
             chalk.magenta([
-              '{ ',
+              valueConstructor === 'Object' ? '' : valueConstructor,
+              ' { ',
               valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
               ' }',
             ].join('')) :
@@ -99,8 +100,10 @@ export class ConsoleDirection extends LoggerDirection {
           return chalk.magenta('{}')
         }
 
+        const constructor = obj.constructor.name === 'Object' ? '' : obj.constructor.name
+
         return [
-          chalk.magenta('{'),
+          chalk.magenta(`${constructor} {`),
           props.join(chalk.gray(`,${ newLineSym}`)),
           (oneline ? '' : SHIFT.repeat(Math.max(deep - 1, 0))) +
           chalk.magenta('}'),
@@ -119,13 +122,13 @@ export class ConsoleDirection extends LoggerDirection {
       undefined: (und) => chalk.red(und),
       string: (str) => chalk.green(`'${str}'`),
       function: (fn) => {
-        const result = [fn.name]
+        const result = [fn.name || '(anonymous)]']
 
         if (Object.getPrototypeOf(fn)) {
           result.push(Object.getPrototypeOf(fn).name)
         }
 
-        return chalk.cyan(result.filter(Boolean).join(' < '))
+        return chalk.cyan(result.filter(Boolean).join(' <  '))
       },
     }
 
