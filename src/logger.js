@@ -25,11 +25,11 @@ export class Logger {
     })
   }
 
-  ns(value) {
+  ns(value, ...args) {
     return new Logger({
       directions: this.directions,
       namespace: this.namespace.concat(value),
-    })
+    }, ...args)
   }
 
 

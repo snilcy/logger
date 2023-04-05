@@ -2,7 +2,7 @@ import chalk from 'chalk'
 
 export const LoggerDirectionType = {
   CONSOLE: 1,
-  FILE: 2
+  FILE: 2,
 }
 
 export const LoggerLevel = {
