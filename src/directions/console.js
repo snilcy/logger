@@ -75,7 +75,7 @@ export class ConsoleDirection extends LoggerDirection {
           value !== null &&
           valueKeys.length ?
             chalk.magenta([
-              valueConstructor === 'Object' ? '' : valueConstructor,
+              valueConstructor === 'Object' ? '' : `${valueConstructor } `,
               '{ ',
               valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
               ' }',
@@ -100,10 +100,10 @@ export class ConsoleDirection extends LoggerDirection {
           return chalk.magenta('{}')
         }
 
-        const constructor = obj.constructor.name === 'Object' ? '' : obj.constructor.name
+        const constructor = obj.constructor.name === 'Object' ? '' : `${obj.constructor.name } `
 
         return [
-          chalk.magenta(`${constructor} {`),
+          chalk.magenta(`${constructor}{`),
           props.join(chalk.gray(`,${ newLineSym}`)),
           (oneline ? '' : SHIFT.repeat(Math.max(deep - 1, 0))) +
           chalk.magenta('}'),
