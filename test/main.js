@@ -10,6 +10,7 @@ const logger = new Logger({
       // color: false,
       // oneline: true,
       deep: 3,
+      align: false
     }),
   ],
 })

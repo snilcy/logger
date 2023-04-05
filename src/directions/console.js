@@ -15,6 +15,7 @@ export class ConsoleDirection extends LoggerDirection {
     this.oneline = options.oneline
     this.format = options.format
     this.deep = options.deep
+    this.align = options.align
   }
 
   #format(body) {
@@ -33,6 +34,7 @@ export class ConsoleDirection extends LoggerDirection {
         color: this.color,
         oneline: this.oneline,
         maxDeep: this.deep,
+        align: this.align,
       }),
     ]
       .filter(Boolean)
@@ -51,6 +53,7 @@ export class ConsoleDirection extends LoggerDirection {
     const deep = options.deep ?? 1
     const color = options.color ?? true
     const oneline = options.oneline ?? false
+    const align = options.align ?? false
     const chalk = new Chalk({ level: color ? 3 : 0 })
     const newLineSym = options.oneline ? '' : '\n'
 
@@ -85,13 +88,14 @@ export class ConsoleDirection extends LoggerDirection {
               deep: deep + 1,
               color,
               oneline,
+              align,
             })
 
           props.push([
             oneline ? '' : SHIFT.repeat(deep),
             key,
             chalk.gray(':'),
-            oneline ? '' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
+            oneline || !align ? '' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
             resValue,
           ].join(''))
         }
@@ -102,8 +106,7 @@ export class ConsoleDirection extends LoggerDirection {
 
         const constructor = obj.constructor.name === 'Object' ? '' : `${obj.constructor.name } `
 
-        return [
-          chalk.magenta(`${constructor}{`),
+        return [ chalk.magenta(`${constructor}{`),
           props.join(chalk.gray(`,${ newLineSym}`)),
           (oneline ? '' : SHIFT.repeat(Math.max(deep - 1, 0))) +
           chalk.magenta('}'),
@@ -115,6 +118,7 @@ export class ConsoleDirection extends LoggerDirection {
           deep: deep + 1,
           color,
           oneline,
+          align,
         }))
         .join(chalk.gray(', ')),
       boolean: (bool) => chalk.yellow(bool),
@@ -128,7 +132,7 @@ export class ConsoleDirection extends LoggerDirection {
           result.push(Object.getPrototypeOf(fn).name)
         }
 
-        return chalk.cyan(result.filter(Boolean).join(' <  '))
+        return chalk.magenta(result.filter(Boolean).join(' <  '))
       },
     }
 
