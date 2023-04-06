@@ -1,6 +1,7 @@
 import { LoggerDirection } from './common.js'
 import { LoggerColorMap } from '../const.js'
 import { Chalk } from 'chalk'
+import { getConstructorName } from '@snilcy/cake'
 
 const SHIFT = ' '.repeat(2)
 const MAX_OBJECT_KEYS_LENGTH = 5
@@ -50,7 +51,7 @@ export class ConsoleDirection extends LoggerDirection {
 
   static stringify = (data, options = {}) => {
     const maxDeep = options.maxDeep || MAX_DEEP_DEFAULT
-    const deep = options.deep ?? 1
+    const deep = options.deep ?? 0
     const color = options.color ?? true
     const oneline = options.oneline ?? false
     const align = options.align ?? false
@@ -71,14 +72,14 @@ export class ConsoleDirection extends LoggerDirection {
         for (const key of keys) {
           const value = obj[key]
           const valueKeys = Object.keys(value || {})
-          const valueConstructor = typeof value === 'object' ? value.constructor.name : ''
+          const valueConstructor = getConstructorName(value) === 'Object' ? '' : `${getConstructorName(value) } `
 
           const resValue = deep > maxDeep &&
           typeof value === 'object' &&
           value !== null &&
           valueKeys.length ?
             chalk.magenta([
-              valueConstructor === 'Object' ? '' : `${valueConstructor } `,
+              valueConstructor,
               '{ ',
               valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
               ' }',
@@ -95,7 +96,7 @@ export class ConsoleDirection extends LoggerDirection {
             oneline ? '' : SHIFT.repeat(deep),
             key,
             chalk.gray(':'),
-            oneline || !align ? '' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
+            oneline || !align ? ' ' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
             resValue,
           ].join(''))
         }
@@ -106,10 +107,10 @@ export class ConsoleDirection extends LoggerDirection {
 
         const constructor = obj.constructor.name === 'Object' ? '' : `${obj.constructor.name } `
 
-        return [ chalk.magenta(`${constructor}{`),
+        return [ chalk.gray(`${constructor}{`),
           props.join(chalk.gray(`,${ newLineSym}`)),
           (oneline ? '' : SHIFT.repeat(Math.max(deep - 1, 0))) +
-          chalk.magenta('}'),
+          chalk.gray('}'),
         ].join(newLineSym)
       },
       array: (arr) => arr
@@ -123,7 +124,7 @@ export class ConsoleDirection extends LoggerDirection {
         .join(chalk.gray(', ')),
       boolean: (bool) => chalk.yellow(bool),
       number: (num) => chalk.blue(num),
-      undefined: (und) => chalk.red(und),
+      undefined: (und) => chalk.gray(und),
       string: (str) => chalk.green(`'${str}'`),
       function: (fn) => {
         const result = [fn.name || '(anonymous)']
