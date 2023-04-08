@@ -1,42 +1,39 @@
 import { LoggerDirection } from './common.js'
 import { LoggerColorMap } from '../const.js'
 import { Chalk } from 'chalk'
-import { getConstructorName } from '@snilcy/cake'
+import {
+  getConstructorName,
+  isObject,
+  isArray,
+  isError,
+  isNull,
+  isUndefined,
+  deepMerge,
+} from '@snilcy/cake'
 
 const SHIFT = ' '.repeat(2)
 const MAX_OBJECT_KEYS_LENGTH = 5
-const MAX_DEEP_DEFAULT = 2
+const MAX_DEEP_DEFAULT = 3
 
 export class ConsoleDirection extends LoggerDirection {
   constructor(options = {}) {
     super()
-    this.prefix = options.prefix ?? '->'
-    // this.indent = options.indent ?? 2
-    this.color = options.color
-    this.oneline = options.oneline
-    this.format = options.format
-    this.deep = options.deep
-    this.align = options.align
+    this.options = deepMerge({
+      prefix: '->',
+    }, options)
   }
 
   #format(body) {
-    if (this.format) {
-      return this.format(body)
+    if (this.options.format) {
+      return this.options.format(body)
     }
 
     const { level, text, namespace } = body
-    // const indent = ' '.repeat(this.indent * namespace.length)
 
     return [
-      // indent,
-      LoggerColorMap[level](this.prefix),
+      LoggerColorMap[level](this.options.prefix),
       namespace,
-      ConsoleDirection.stringify(text, {
-        color: this.color,
-        oneline: this.oneline,
-        maxDeep: this.deep,
-        align: this.align,
-      }),
+      ConsoleDirection.stringify(text, this.options),
     ]
       .filter(Boolean)
       .flat(3)
@@ -44,59 +41,80 @@ export class ConsoleDirection extends LoggerDirection {
 
   }
 
-  act(body) {
+  act(body, options) {
+    if (options) {
+      this.options = deepMerge({}, this.options, options)
+    }
+
     const content = this.#format(body)
     console.log(content)
   }
 
   static stringify = (data, options = {}) => {
-    const maxDeep = options.maxDeep || MAX_DEEP_DEFAULT
-    const deep = options.deep ?? 0
-    const color = options.color ?? true
-    const oneline = options.oneline ?? false
-    const align = options.align ?? false
-    const chalk = new Chalk({ level: color ? 3 : 0 })
+    options = deepMerge({
+      deep: MAX_DEEP_DEFAULT,
+      _deep: 0,
+      color: true,
+      oneline: false,
+      align: false,
+      undefined: true,
+      keys: [],
+      exclude: [],
+    }, options)
+
     const newLineSym = options.oneline ? '' : '\n'
+    const chalk = new Chalk({ level: options.color ? 3 : 0 })
 
     const TypeHandler = {
       object: (obj) => {
-        if (obj === null) {
-          return chalk.red('null')
-        }
-
         const props = []
         const keys = Object.keys(obj)
         const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
+
         keys.sort()
+
+        if (isError(obj)) {
+          keys.unshift('message')
+        }
 
         for (const key of keys) {
           const value = obj[key]
           const valueKeys = Object.keys(value || {})
           const valueConstructor = getConstructorName(value) === 'Object' ? '' : `${getConstructorName(value) } `
+          const optionsKeys = options.keys.concat(key)
 
-          const resValue = deep > maxDeep &&
-          typeof value === 'object' &&
-          value !== null &&
-          valueKeys.length ?
-            chalk.magenta([
-              valueConstructor,
-              '{ ',
-              valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
-              ' }',
-            ].join('')) :
-            ConsoleDirection.stringify(value, {
-              maxDeep,
-              deep: deep + 1,
-              color,
-              oneline,
-              align,
-            })
+          if (
+            (isUndefined(value) && !options.undefined) || // undefined option
+            options.exclude.includes(optionsKeys.join('.')) // exclude option
+          ) {
+            continue
+          }
+
+          const shortObject = chalk.magenta([
+            valueConstructor,
+            '{ ',
+            valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
+            ' }',
+          ].join(''))
+
+          const resValue =
+            options._deep > options.deep &&
+            isObject(value) &&
+            valueKeys.length ?
+              shortObject :
+              ConsoleDirection.stringify(
+                value,
+                deepMerge({}, options, {
+                  keys: optionsKeys,
+                  _deep: options._deep + 1,
+                }),
+              )
 
           props.push([
-            oneline ? '' : SHIFT.repeat(deep),
+            options.oneline ? '' : SHIFT.repeat(options._deep),
             key,
             chalk.gray(':'),
-            oneline || !align ? ' ' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
+            options.oneline || !options.align ? ' ' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
             resValue,
           ].join(''))
         }
@@ -105,23 +123,23 @@ export class ConsoleDirection extends LoggerDirection {
           return chalk.magenta('{}')
         }
 
-        const constructor = obj.constructor.name === 'Object' ? '' : `${obj.constructor.name } `
+        const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
+        const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
 
-        return [ chalk.gray(`${constructor}{`),
+        return [
+          colorConstrName + chalk.gray('{'),
           props.join(chalk.gray(`,${ newLineSym}`)),
-          (oneline ? '' : SHIFT.repeat(Math.max(deep - 1, 0))) +
+          (options.oneline ? '' : SHIFT.repeat(Math.max(options._deep - 1, 0))) +
           chalk.gray('}'),
         ].join(newLineSym)
       },
       array: (arr) => arr
-        .map((el) => ConsoleDirection.stringify(el, {
-          maxDeep,
-          deep: deep + 1,
-          color,
-          oneline,
-          align,
-        }))
+        .map((el) => ConsoleDirection.stringify(
+          el,
+          deepMerge({}, options, { _deep: options._deep + 1 }),
+        ))
         .join(chalk.gray(', ')),
+      null: () => chalk.red('null'),
       boolean: (bool) => chalk.yellow(bool),
       number: (num) => chalk.blue(num),
       undefined: (und) => chalk.gray(und),
@@ -137,7 +155,11 @@ export class ConsoleDirection extends LoggerDirection {
       },
     }
 
-    if (Array.isArray(data)) {
+    if (isNull(data)) {
+      return TypeHandler.null()
+    }
+
+    if (isArray(data)) {
       return TypeHandler.array(data)
     }
 

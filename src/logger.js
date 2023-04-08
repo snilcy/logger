@@ -5,6 +5,7 @@ export class Logger {
   namespace = []
 
   constructor(options = {}) {
+    this.directionsArgs = options.directionsArgs
     this.directions = options.directions || []
     this.namespace = [options.namespace]
       .filter(Boolean)
@@ -21,15 +22,16 @@ export class Logger {
         level,
         text,
         namespace: this.namespace,
-      })
+      }, this.directionsArgs)
     })
   }
 
-  ns(value, ...args) {
+  ns(value, directionsArgs) {
     return new Logger({
       directions: this.directions,
+      directionsArgs,
       namespace: this.namespace.concat(value),
-    }, ...args)
+    })
   }
 
 

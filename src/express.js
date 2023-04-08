@@ -2,8 +2,8 @@ import { Logger, ConsoleDirection } from './index.js'
 
 export const express = (title = 'REST') => {
   const logger = new Logger({
-    directions: [ new ConsoleDirection() ],
-    namespace: [title]
+    directions: [new ConsoleDirection()],
+    namespace: [title],
   })
 
   return (req, res, next) => {
@@ -16,7 +16,7 @@ export const express = (title = 'REST') => {
         req.hostname,
         ':',
         req.port,
-        req.originalUrl
+        req.originalUrl,
       ].join(''), req.body,
     ])
 
