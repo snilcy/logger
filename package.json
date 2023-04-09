@@ -1,6 +1,6 @@
 {
   "name": "@snilcy/logger",
-  "version": "2.11.3",
+  "version": "2.11.4",
   "description": "",
   "main": "src/index.js",
   "type": "module",
