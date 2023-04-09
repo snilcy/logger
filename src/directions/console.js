@@ -140,10 +140,7 @@ export class ConsoleDirection extends LoggerDirection {
       },
       array: (arr) => {
         const content = arr
-          .map((el) => ConsoleDirection.stringify(
-            el,
-            deepMerge({}, options, { _deep: options._deep + 1 }),
-          ))
+          .map((el) => ConsoleDirection.stringify(el, options))
           .join(chalk.gray(', '))
 
         return [
