@@ -60,6 +60,7 @@ export class ConsoleDirection extends LoggerDirection {
       undefined: true,
       keys: [],
       exclude: [],
+      only: [],
     }, options)
 
     const newLineSym = options.oneline ? '' : '\n'
@@ -82,10 +83,14 @@ export class ConsoleDirection extends LoggerDirection {
           const valueKeys = Object.keys(value || {})
           const valueConstructor = getConstructorName(value) === 'Object' ? '' : `${getConstructorName(value) } `
           const optionsKeys = options.keys.concat(key)
+          const optionsKeysStr = optionsKeys.join('.')
 
           if (
             (isUndefined(value) && !options.undefined) || // undefined option
-            options.exclude.includes(optionsKeys.join('.')) // exclude option
+            options.exclude.includes(optionsKeysStr) || // exclude option
+            options.only.length && !options.only.find((onlyKey) =>
+              onlyKey.startsWith(optionsKeysStr) ||
+              optionsKeysStr.startsWith(onlyKey))
           ) {
             continue
           }
@@ -133,12 +138,20 @@ export class ConsoleDirection extends LoggerDirection {
           chalk.gray('}'),
         ].join(newLineSym)
       },
-      array: (arr) => arr
-        .map((el) => ConsoleDirection.stringify(
-          el,
-          deepMerge({}, options, { _deep: options._deep + 1 }),
-        ))
-        .join(chalk.gray(', ')),
+      array: (arr) => {
+        const content = arr
+          .map((el) => ConsoleDirection.stringify(
+            el,
+            deepMerge({}, options, { _deep: options._deep + 1 }),
+          ))
+          .join(chalk.gray(', '))
+
+        return [
+          chalk.gray('['),
+          content,
+          chalk.gray(']'),
+        ].join('')
+      },
       null: () => chalk.red('null'),
       boolean: (bool) => chalk.yellow(bool),
       number: (num) => chalk.blue(num),
