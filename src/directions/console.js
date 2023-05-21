@@ -14,6 +14,10 @@ import {
 const SHIFT = ' '.repeat(2)
 const MAX_OBJECT_KEYS_LENGTH = 5
 const MAX_DEEP_DEFAULT = 3
+const LINE_TERMINATORS_MAP = {
+  '\r': '\\r',
+  '\n': '\\n',
+}
 
 export class ConsoleDirection extends LoggerDirection {
   constructor(options = {}) {
@@ -61,6 +65,7 @@ export class ConsoleDirection extends LoggerDirection {
       keys: [],
       exclude: [],
       only: [],
+      lineTerminators: false,
     }, options)
 
     const newLineSym = options.oneline ? '' : '\n'
@@ -156,7 +161,13 @@ export class ConsoleDirection extends LoggerDirection {
       boolean: (bool) => chalk.yellow(bool),
       number: (num) => chalk.blue(num),
       undefined: (und) => chalk.gray(und),
-      string: (str) => chalk.green(`'${str}'`),
+      string: (str) => {
+        if (options.lineTerminators) {
+          str = str.replace(/\s/g,(sym) => LINE_TERMINATORS_MAP[sym] || sym)
+        }
+
+        return chalk.green(`'${str}'`)
+      },
       function: (fn) => {
         const result = [fn.name || '(anonymous)']
 

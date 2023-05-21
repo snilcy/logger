@@ -9,7 +9,7 @@ export const express = (title = 'REST') => {
   return (req, res, next) => {
     req.port = res.socket.localPort
 
-    logger.debug([
+    logger.debug(
       req.method, [
         req.protocol,
         '://',
@@ -18,7 +18,7 @@ export const express = (title = 'REST') => {
         req.port,
         req.originalUrl,
       ].join(''), req.body,
-    ])
+    )
 
     next()
   }

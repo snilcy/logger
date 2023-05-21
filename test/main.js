@@ -12,6 +12,7 @@ const logger = new Logger({
       deep: 5,
       // align: false,
       // undefined: false,
+      lineTerminators: false,
     }),
   ],
 })
@@ -28,13 +29,15 @@ class SomeError extends Error {
 const someError = new SomeError('Some error message')
 const lgr = new Logger()
 
-const data = { 'context':{},'options':{ 'telegram':{},'handlerTimeout':90000 },'telegram':{ 'token':'5985340756:AAHs2uixjfZIZyK8GiVBYo-dHdxpLWV5amc','options':{ 'apiRoot':'https://api.telegram.org','apiMode':'bot','webhookReply':true,'agent':{ '_events':{},'_eventsCount':2,'defaultPort':undefined,'protocol':'https:','options':{ 'keepAlive':true,'keepAliveMsecs':10000,'noDelay':true,'path':null },'requests':{},'sockets':{},'freeSockets':{},'keepAliveMsecs':10000,'keepAlive':true,'maxSockets':null,'maxFreeSockets':256,'scheduling':'lifo','maxTotalSockets':null,'totalSocketCount':0,'maxCachedSessions':100,'_sessionCache':{ 'map':{},'list':[] }},'testEnv':false, 'fn': () => {}, 'func': console.clear, 'cls': Logger, 'console': consoleDirection, error, someError, lgr, undf: undefined, arr: [ 1 ,3 ,7 ],
-}}}
+// const data = { 'context':{},'options':{ 'telegram':{},'handlerTimeout':90000 },'telegram':{ 'token':'5985340756:AAHs2uixjfZIZyK8GiVBYo-dHdxpLWV5amc','options':{ 'apiRoot':'https://api.telegram.org','apiMode':'bot','webhookReply':true,'agent':{ '_events':{},'_eventsCount':2,'defaultPort':undefined,'protocol':'https:','options':{ 'keepAlive':true,'keepAliveMsecs':10000,'noDelay':true,'path':null },'requests':{},'sockets':{},'freeSockets':{},'keepAliveMsecs':10000,'keepAlive':true,'maxSockets':null,'maxFreeSockets':256,'scheduling':'lifo','maxTotalSockets':null,'totalSocketCount':0,'maxCachedSessions':100,'_sessionCache':{ 'map':{},'list':[] }},'testEnv':false, 'fn': () => {}, 'func': console.clear, 'cls': Logger, 'console': consoleDirection, error, someError, lgr, undf: undefined, arr: [ 1 ,3 ,7 ],
+// }}}
 
 // const data = {
 //   error,
 //   someError,
 // }
+
+const data = '<div class="activity-item__image activity-item__image--courses">   \r\n<img src="https://assets.htmlacademy.ru/img/study/keks_courses.v3.svg" width="82" height="101" alt="Тренажёры"></div>'
 
 // console.log((ConsoleDirection).name)
 // console.log(Object.getPrototypeOf(ConsoleDirection).name)
@@ -59,13 +62,13 @@ const r = logger.ns('🚀')
 // r.error('error')
 
 const c = r.ns('🐱', {
-  exclude: [
-    'telegram.options.agent',
-    'options',
-  ],
-  only: [
-    'telegram.options.arr',
-  ],
+  // exclude: [
+  //   'telegram.options.agent',
+  //   'options',
+  // ],
+  // only: [
+  //   'telegram.options.arr',
+  // ],
 })
 // c.info('meow')
 c.debug(data)
