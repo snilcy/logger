@@ -13,6 +13,7 @@ const logger = new Logger({
       // align: false,
       // undefined: false,
       lineTerminators: false,
+      excludeKyes: ['arr'],
     }),
   ],
 })

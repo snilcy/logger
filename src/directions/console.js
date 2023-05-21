@@ -62,7 +62,8 @@ export class ConsoleDirection extends LoggerDirection {
       align: false,
       undefined: true,
       keys: [],
-      exclude: [],
+      excludePath: [],
+      excludeKyes: [],
       only: [],
       lineTerminators: false,
     }, options)
@@ -85,14 +86,13 @@ export class ConsoleDirection extends LoggerDirection {
 
         for (const key of keys) {
           const value = obj[key]
-          const valueKeys = Object.keys(value || {})
-          const valueConstructor = getConstructorName(value) === 'Object' ? '' : `${getConstructorName(value) } `
           const optionsKeys = options.keys.concat(key)
           const optionsKeysStr = optionsKeys.join('.')
 
           if (
             (isUndefined(value) && !options.undefined) || // undefined option
-            options.exclude.includes(optionsKeysStr) || // exclude option
+            options.excludePath.includes(optionsKeysStr) || // exclude option
+            options.excludeKyes.includes(key) || // exclude option
             options.only.length && !options.only.find((onlyKey) =>
               onlyKey.startsWith(optionsKeysStr) ||
               optionsKeysStr.startsWith(onlyKey))
