@@ -3,7 +3,6 @@ import { LoggerColorMap } from '../const.js'
 import { Chalk } from 'chalk'
 import {
   getConstructorName,
-  isObject,
   isArray,
   isError,
   isNull,
@@ -83,6 +82,7 @@ export class ConsoleDirection extends LoggerDirection {
           keys.unshift('message')
         }
 
+
         for (const key of keys) {
           const value = obj[key]
           const valueKeys = Object.keys(value || {})
@@ -100,26 +100,13 @@ export class ConsoleDirection extends LoggerDirection {
             continue
           }
 
-          let resValue = ConsoleDirection.stringify(
+          const resValue = ConsoleDirection.stringify(
             value,
             deepMerge({}, options, {
               keys: optionsKeys,
               _deep: options._deep + 1,
             }),
           )
-
-          if (options._deep >= options.deep) {
-            if (isObject(value) && valueKeys.length) {
-              resValue = chalk.magenta([
-                valueConstructor,
-                '{ ',
-                valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
-                ' }',
-              ].join(''))
-            }
-          }
-
-
           props.push([
             options.oneline ? '' : SHIFT.repeat(options._deep),
             key,
@@ -129,27 +116,32 @@ export class ConsoleDirection extends LoggerDirection {
           ].join(''))
         }
 
-        if (!props.length) {
-          return chalk.magenta('{}')
-        }
-
         const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
         const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
 
+        if (!props.length) {
+          return chalk.magenta(`${colorConstrName}{}`)
+        }
+
+        if (options._deep >= options.deep) {
+          return chalk.magenta([
+            colorConstrName,
+            '{',
+            keys.length > MAX_OBJECT_KEYS_LENGTH ? `#${keys.length}` : keys.join(', '),
+            '}',
+          ].filter(Boolean).join(' '))
+        }
+
         return [
           colorConstrName + chalk.gray('{'),
-          props.join(chalk.gray(`,${ newLineSym}`)),
+          props.join(chalk.gray(`,${ newLineSym}`)) ,
           (options.oneline ? '' : SHIFT.repeat(Math.max(options._deep - 1, 0))) +
           chalk.gray('}'),
         ].join(newLineSym)
       },
       array: (arr) => {
         if (options._deep >= options.deep) {
-          return [
-            chalk.gray('['),
-            chalk.magenta(`#${ arr.length}`),
-            chalk.gray(']'),
-          ].join('')
+          return chalk.magenta(`[ #${ arr.length} ]`)
         }
 
         const content = arr

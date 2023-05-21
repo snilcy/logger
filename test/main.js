@@ -9,7 +9,7 @@ const logger = new Logger({
       // indent: 5,
       // color: false,
       // oneline: true,
-      deep: 2,
+      deep: 4,
       // align: false,
       // undefined: false,
       lineTerminators: false,
