@@ -73,7 +73,6 @@ export class ConsoleDirection extends LoggerDirection {
 
     const TypeHandler = {
       object: (obj) => {
-        console.log('object', obj)
         const props = []
         const keys = Object.keys(obj)
         const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
