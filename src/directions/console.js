@@ -73,6 +73,7 @@ export class ConsoleDirection extends LoggerDirection {
 
     const TypeHandler = {
       object: (obj) => {
+        console.log('object', obj)
         const props = []
         const keys = Object.keys(obj)
         const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
@@ -100,25 +101,25 @@ export class ConsoleDirection extends LoggerDirection {
             continue
           }
 
-          const shortObject = chalk.magenta([
-            valueConstructor,
-            '{ ',
-            valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
-            ' }',
-          ].join(''))
+          let resValue = ConsoleDirection.stringify(
+            value,
+            deepMerge({}, options, {
+              keys: optionsKeys,
+              _deep: options._deep + 1,
+            }),
+          )
 
-          const resValue =
-            options._deep > options.deep &&
-            isObject(value) &&
-            valueKeys.length ?
-              shortObject :
-              ConsoleDirection.stringify(
-                value,
-                deepMerge({}, options, {
-                  keys: optionsKeys,
-                  _deep: options._deep + 1,
-                }),
-              )
+          if (options._deep >= options.deep) {
+            if (isObject(value) && valueKeys.length) {
+              resValue = chalk.magenta([
+                valueConstructor,
+                '{ ',
+                valueKeys.length > MAX_OBJECT_KEYS_LENGTH ? `#${ valueKeys.length}` : valueKeys,
+                ' }',
+              ].join(''))
+            }
+          }
+
 
           props.push([
             options.oneline ? '' : SHIFT.repeat(options._deep),
@@ -144,6 +145,14 @@ export class ConsoleDirection extends LoggerDirection {
         ].join(newLineSym)
       },
       array: (arr) => {
+        if (options._deep >= options.deep) {
+          return [
+            chalk.gray('['),
+            chalk.magenta(`#${ arr.length}`),
+            chalk.gray(']'),
+          ].join('')
+        }
+
         const content = arr
           .map((el) => ConsoleDirection.stringify(
             el,

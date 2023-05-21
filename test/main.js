@@ -9,7 +9,7 @@ const logger = new Logger({
       // indent: 5,
       // color: false,
       // oneline: true,
-      deep: 5,
+      deep: 2,
       // align: false,
       // undefined: false,
       lineTerminators: false,
@@ -37,7 +37,16 @@ const lgr = new Logger()
 //   someError,
 // }
 
-const data = '<div class="activity-item__image activity-item__image--courses">   \r\n<img src="https://assets.htmlacademy.ru/img/study/keks_courses.v3.svg" width="82" height="101" alt="Тренажёры"></div>'
+// const data = '<div class="activity-item__image activity-item__image--courses">   \r\n<img src="https://assets.htmlacademy.ru/img/study/keks_courses.v3.svg" width="82" height="101" alt="Тренажёры"></div>'
+
+const data = [
+  1,
+  {
+    one: 'name',
+    arr: [ 1, 4 ],
+  },
+  4,
+]
 
 // console.log((ConsoleDirection).name)
 // console.log(Object.getPrototypeOf(ConsoleDirection).name)
