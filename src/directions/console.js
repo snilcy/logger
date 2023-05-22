@@ -63,7 +63,7 @@ export class ConsoleDirection extends LoggerDirection {
       undefined: true,
       keys: [],
       excludePath: [],
-      excludeKyes: [],
+      excludeKeys: [],
       only: [],
       lineTerminators: false,
     }, options)
@@ -92,7 +92,7 @@ export class ConsoleDirection extends LoggerDirection {
           if (
             (isUndefined(value) && !options.undefined) || // undefined option
             options.excludePath.includes(optionsKeysStr) || // exclude option
-            options.excludeKyes.includes(key) || // exclude option
+            options.excludeKeys.includes(key) || // exclude option
             options.only.length && !options.only.find((onlyKey) =>
               onlyKey.startsWith(optionsKeysStr) ||
               optionsKeysStr.startsWith(onlyKey))
@@ -118,7 +118,6 @@ export class ConsoleDirection extends LoggerDirection {
 
         const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
         const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
-
         if (!props.length) {
           return chalk.magenta(`${colorConstrName}{}`)
         }
@@ -140,6 +139,11 @@ export class ConsoleDirection extends LoggerDirection {
         ].join(newLineSym)
       },
       array: (arr) => {
+        if (!arr.length) {
+          return chalk.magenta('[]')
+        }
+
+
         if (options._deep >= options.deep) {
           return chalk.magenta(`[ #${ arr.length} ]`)
         }
