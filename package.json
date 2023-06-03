@@ -2,7 +2,7 @@
   "name": "@snilcy/logger",
   "version": "2.14.2",
   "description": "",
-  "main": "src/index.js",
+  "main": "./build/index.js",
   "type": "module",
   "scripts": {
     "test": "nodemon ./test/index.js",
