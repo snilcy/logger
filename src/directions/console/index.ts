@@ -75,15 +75,23 @@ export class ConsoleDirection implements ILoggerDirection {
 
         for (const key of keys) {
           const value = obj[key]
-          const optionsKeys = options.keys.concat(key)
+          const optionsKeys = (options.keys || []).concat(key)
           const optionsKeysStr = optionsKeys.join('.')
 
-          if (
-            (isUndefined(value) && !options.undefined) || //          undefined
-            options.excludePath.includes(optionsKeysStr) || //        exclude path
-            options.excludeKeys.includes(key) || //                   exclude keys
-            options.only.length && !options.only.find((onlyKey) => // only
-              onlyKey.startsWith(optionsKeysStr) ||
+          if (isUndefined(value) && !options.undefined) {
+            continue
+          }
+
+          if (options.excludePath && options.excludePath.includes(optionsKeysStr)) {
+            continue
+          }
+
+          if (options.excludeKeys && options.excludeKeys.includes(key)) {
+            continue
+          }
+
+          if (options.only && options.only.length && !options.only.find((onlyKey) => // only
+            onlyKey.startsWith(optionsKeysStr) ||
               optionsKeysStr.startsWith(onlyKey))
           ) {
             continue
