@@ -8,9 +8,9 @@ export interface IConsoleDirectionOptions {
   oneline?: boolean,
   align?: boolean,
   undefined?: boolean,
-  keys: string[],
-  excludePath: string[],
-  excludeKeys: string[],
-  only: string[],
+  keys?: string[],
+  excludePath?: string[],
+  excludeKeys?: string[],
+  only?: string[],
   lineTerminators?: boolean,
 }
