@@ -1,24 +1,20 @@
-import { Logger, ConsoleDirection } from '../src/index.js'
+import { Logger } from '../build/index.js'
 console.clear()
 
-const logger = new Logger({
-  directions: [
-    new ConsoleDirection({
-      // format: (a) => a,
-      // prefix: '',
-      // indent: 5,
-      // color: false,
-      // oneline: true,
-      deep: 4,
-      // align: false,
-      // undefined: false,
-      lineTerminators: false,
-      excludeKyes: ['arr'],
-    }),
-  ],
+const logger = new Logger('Root', {
+  console: {
+    // format: (a) => a,
+    // prefix: '',
+    // indent: 20,
+    // color: false,
+    // oneline: true,
+    deep: 4,
+    // align: false,
+    // undefined: false,
+    lineTerminators: false,
+    excludeKeys: ['arr'],
+  },
 })
-
-const consoleDirection = new ConsoleDirection()
 
 const error = new Error('error message')
 class SomeError extends Error {

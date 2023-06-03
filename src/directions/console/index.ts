@@ -1,42 +1,44 @@
-import { LoggerDirection } from './common.js'
-import { LoggerColorMap } from '../const.js'
+import type { ILoggerDirection } from '../types.js'
+import type { ILoggerMessage } from '../../types.js'
+import type { IConsoleDirectionOptions } from './types.js'
+
+import { LoggerColorMap } from '../../const.js'
 import { Chalk } from 'chalk'
+
 import {
   getConstructorName,
   isArray,
   isError,
   isNull,
   isUndefined,
-  deepMerge,
+  merge,
 } from '@snilcy/cake'
 
-const SHIFT = ' '.repeat(2)
-const MAX_OBJECT_KEYS_LENGTH = 5
-const MAX_DEEP_DEFAULT = 3
-const LINE_TERMINATORS_MAP = {
-  '\r': '\\r',
-  '\n': '\\n',
-}
+import {
+  SHIFT,
+  MAX_OBJECT_KEYS_LENGTH,
+  LINE_TERMINATORS_MAP,
+  DEFAULT_OPTIONS,
+} from './const.js'
 
-export class ConsoleDirection extends LoggerDirection {
-  constructor(options = {}) {
-    super()
-    this.options = deepMerge({
-      prefix: '->',
-    }, options)
+export class ConsoleDirection implements ILoggerDirection {
+  private options: IConsoleDirectionOptions = DEFAULT_OPTIONS
+
+  constructor(options: IConsoleDirectionOptions) {
+    this.options = merge(this.options, options)
   }
 
-  #format(body) {
+  private format(body: ILoggerMessage) {
     if (this.options.format) {
       return this.options.format(body)
     }
 
-    const { level, text, namespace } = body
+    const { level, data, namespace } = body
 
     return [
       LoggerColorMap[level](this.options.prefix),
       namespace,
-      ConsoleDirection.stringify(text, this.options),
+      ConsoleDirection.stringify(data, this.options),
     ]
       .filter(Boolean)
       .flat(3)
@@ -44,36 +46,23 @@ export class ConsoleDirection extends LoggerDirection {
 
   }
 
-  act(body, options) {
-    if (options) {
-      this.options = deepMerge({}, this.options, options)
-    }
-
-    const content = this.#format(body)
+  act(body: ILoggerMessage) {
+    const content = this.format(body)
     console.log(content)
   }
 
-  static stringify = (data, options = {}) => {
-    options = deepMerge({
-      deep: MAX_DEEP_DEFAULT,
-      _deep: 0,
-      color: true,
-      oneline: false,
-      align: false,
-      undefined: true,
-      keys: [],
-      excludePath: [],
-      excludeKeys: [],
-      only: [],
-      lineTerminators: false,
-    }, options)
+  static stringify = (data: ILoggerMessage['data'], options: IConsoleDirectionOptions = DEFAULT_OPTIONS, currentDeep = 0): string => {
+    if (options) {
+      options = merge(DEFAULT_OPTIONS, options)
+    }
 
     const newLineSym = options.oneline ? '' : '\n'
     const chalk = new Chalk({ level: options.color ? 3 : 0 })
 
     const TypeHandler = {
-      object: (obj) => {
-        const props = []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      object: (obj: any) => {
+        const props: string[] = []
         const keys = Object.keys(obj)
         const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
 
@@ -90,10 +79,10 @@ export class ConsoleDirection extends LoggerDirection {
           const optionsKeysStr = optionsKeys.join('.')
 
           if (
-            (isUndefined(value) && !options.undefined) || // undefined option
-            options.excludePath.includes(optionsKeysStr) || // exclude option
-            options.excludeKeys.includes(key) || // exclude option
-            options.only.length && !options.only.find((onlyKey) =>
+            (isUndefined(value) && !options.undefined) || //          undefined
+            options.excludePath.includes(optionsKeysStr) || //        exclude path
+            options.excludeKeys.includes(key) || //                   exclude keys
+            options.only.length && !options.only.find((onlyKey) => // only
               onlyKey.startsWith(optionsKeysStr) ||
               optionsKeysStr.startsWith(onlyKey))
           ) {
@@ -102,13 +91,12 @@ export class ConsoleDirection extends LoggerDirection {
 
           const resValue = ConsoleDirection.stringify(
             value,
-            deepMerge({}, options, {
-              keys: optionsKeys,
-              _deep: options._deep + 1,
-            }),
+            merge(options, { keys: optionsKeys }),
+            currentDeep + 1,
           )
+
           props.push([
-            options.oneline ? '' : SHIFT.repeat(options._deep),
+            options.oneline ? '' : SHIFT.repeat(currentDeep),
             key,
             chalk.gray(':'),
             options.oneline || !options.align ? ' ' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
@@ -118,11 +106,12 @@ export class ConsoleDirection extends LoggerDirection {
 
         const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
         const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
+
         if (!props.length) {
           return chalk.magenta(`${colorConstrName}{}`)
         }
 
-        if (options._deep >= options.deep) {
+        if (options.deep && currentDeep >= options.deep) {
           return chalk.magenta([
             colorConstrName,
             '{',
@@ -134,25 +123,23 @@ export class ConsoleDirection extends LoggerDirection {
         return [
           colorConstrName + chalk.gray('{'),
           props.join(chalk.gray(`,${ newLineSym}`)) ,
-          (options.oneline ? '' : SHIFT.repeat(Math.max(options._deep - 1, 0))) +
+          (options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))) +
           chalk.gray('}'),
         ].join(newLineSym)
       },
-      array: (arr) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      array: (arr: any[]) => {
         if (!arr.length) {
           return chalk.magenta('[]')
         }
 
 
-        if (options._deep >= options.deep) {
+        if (options.deep && currentDeep >= options.deep) {
           return chalk.magenta(`[ #${ arr.length} ]`)
         }
 
         const content = arr
-          .map((el) => ConsoleDirection.stringify(
-            el,
-            deepMerge({}, options, { _deep: options._deep + 1 }),
-          ))
+          .map((el) => ConsoleDirection.stringify(el, options, currentDeep + 1))
           .join(chalk.gray(', '))
 
         return [
@@ -162,17 +149,18 @@ export class ConsoleDirection extends LoggerDirection {
         ].join('')
       },
       null: () => chalk.red('null'),
-      boolean: (bool) => chalk.yellow(bool),
-      number: (num) => chalk.blue(num),
-      undefined: (und) => chalk.gray(und),
-      string: (str) => {
+      boolean: (bool: boolean) => chalk.yellow(bool),
+      number: (num: number) => chalk.blue(num),
+      undefined: (und: undefined) => chalk.gray(und),
+      string: (str: string) => {
         if (options.lineTerminators) {
           str = str.replace(/\s/g,(sym) => LINE_TERMINATORS_MAP[sym] || sym)
         }
 
-        return chalk.green(`'${str}'`)
+        return chalk.green(str)
       },
-      function: (fn) => {
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      function: (fn: Function) => {
         const result = [fn.name || '(anonymous)']
 
         if (Object.getPrototypeOf(fn)) {
@@ -181,6 +169,8 @@ export class ConsoleDirection extends LoggerDirection {
 
         return chalk.magenta(result.filter(Boolean).join(' <  '))
       },
+      bigint: (val: bigint) => val.toString(),
+      symbol: (val: symbol) => val.toString(),
     }
 
     if (isNull(data)) {
@@ -192,11 +182,8 @@ export class ConsoleDirection extends LoggerDirection {
     }
 
     const type = typeof data
+    const typeHandler = TypeHandler[type]
 
-    if (TypeHandler[type]) {
-      return TypeHandler[type](data)
-    }
-
-    return Object.prototype.toString.call(data)
+    return typeHandler(data)
   }
 }

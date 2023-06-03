@@ -1,15 +1,15 @@
 import chalk from 'chalk'
 
-export const LoggerDirectionType = {
-  CONSOLE: 1,
-  FILE: 2,
+export enum LoggerDirectionType {
+  CONSOLE,
+  FILE,
 }
 
-export const LoggerLevel = {
-  DEBUG: 0,
-  INFO: 1,
-  WARN: 2,
-  ERROR: 3,
+export enum LoggerLevel {
+  DEBUG,
+  INFO,
+  WARN,
+  ERROR,
 }
 
 export const LoggerMethodsMap = {
