@@ -17,4 +17,5 @@ export const DEFAULT_OPTIONS = {
     excludeKeys: [],
     only: [],
     lineTerminators: false,
+    length: false,
 };

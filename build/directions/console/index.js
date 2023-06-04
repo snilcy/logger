@@ -1,7 +1,7 @@
 import { LoggerColorMap } from '../../const.js';
 import { Chalk } from 'chalk';
 import { getConstructorName, isArray, isError, isNull, isUndefined, merge, } from '@snilcy/cake';
-import { SHIFT, MAX_OBJECT_KEYS_LENGTH, LINE_TERMINATORS_MAP, DEFAULT_OPTIONS, } from './const.js';
+import { SHIFT, LINE_TERMINATORS_MAP, DEFAULT_OPTIONS, } from './const.js';
 export class ConsoleDirection {
     options = DEFAULT_OPTIONS;
     constructor(options) {
@@ -29,7 +29,6 @@ export class ConsoleDirection {
         if (options) {
             options = merge(DEFAULT_OPTIONS, options);
         }
-        const newLineSym = options.oneline ? '' : '\n';
         const chalk = new Chalk({ level: options.color ? 3 : 0 });
         const TypeHandler = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,36 +69,36 @@ export class ConsoleDirection {
                 }
                 const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj)} `;
                 const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName);
-                if (!props.length) {
-                    return chalk.magenta(`${colorConstrName}{}`);
-                }
-                if (options.deep && currentDeep >= options.deep) {
-                    return chalk.magenta([
-                        colorConstrName,
-                        '{',
-                        keys.length > MAX_OBJECT_KEYS_LENGTH ? `#${keys.length}` : keys.join(', '),
-                        '}',
-                    ].filter(Boolean).join(' '));
-                }
-                return [
-                    colorConstrName + chalk.gray('{'),
+                const newLineSym = options.oneline ? '' : '\n';
+                const closeRhift = options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0));
+                let content = props.length ? [
+                    '',
                     props.join(chalk.gray(`,${newLineSym}`)),
-                    (options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))) +
-                        chalk.gray('}'),
-                ].join(newLineSym);
+                    closeRhift,
+                ].join(newLineSym) : '';
+                if (options.deep && currentDeep >= options.deep) {
+                    content = chalk.gray(' ... ');
+                }
+                const length = options.length ? chalk.gray(`#${props.length} `) : '';
+                return [
+                    colorConstrName,
+                    length,
+                    chalk.gray('{'),
+                    content,
+                    chalk.gray('}'),
+                ].join('');
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             array: (arr) => {
-                if (!arr.length) {
-                    return chalk.magenta('[]');
-                }
-                if (options.deep && currentDeep >= options.deep) {
-                    return chalk.magenta(`[ #${arr.length} ]`);
-                }
-                const content = arr
+                let content = arr
                     .map((el) => ConsoleDirection.stringify(el, options, currentDeep + 1))
                     .join(chalk.gray(', '));
+                if (options.deep && currentDeep >= options.deep) {
+                    content = chalk.gray(' ... ');
+                }
+                const length = options.length ? chalk.gray(`#${arr.length} `) : '';
                 return [
+                    length,
                     chalk.gray('['),
                     content,
                     chalk.gray(']'),
@@ -113,7 +112,13 @@ export class ConsoleDirection {
                 if (options.lineTerminators) {
                     str = str.replace(/\s/g, (sym) => LINE_TERMINATORS_MAP[sym] || sym);
                 }
-                return chalk.green(str);
+                const length = options.length ? chalk.gray(`#${str.length} `) : '';
+                return [
+                    length,
+                    chalk.gray('\''),
+                    chalk.green(str),
+                    chalk.gray('\''),
+                ].join('');
             },
             // eslint-disable-next-line @typescript-eslint/ban-types
             function: (fn) => {

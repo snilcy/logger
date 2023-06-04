@@ -56,7 +56,6 @@ export class ConsoleDirection implements ILoggerDirection {
       options = merge(DEFAULT_OPTIONS, options)
     }
 
-    const newLineSym = options.oneline ? '' : '\n'
     const chalk = new Chalk({ level: options.color ? 3 : 0 })
 
     const TypeHandler = {
@@ -115,42 +114,45 @@ export class ConsoleDirection implements ILoggerDirection {
         const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
         const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
 
-        if (!props.length) {
-          return chalk.magenta(`${colorConstrName}{}`)
-        }
+        const newLineSym = options.oneline ? '' : '\n'
+        const closeRhift = options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))
+
+        let content = props.length ? [
+          '',
+          props.join(chalk.gray(`,${ newLineSym}`)),
+          closeRhift,
+        ].join(newLineSym) : ''
+
 
         if (options.deep && currentDeep >= options.deep) {
-          return chalk.magenta([
-            colorConstrName,
-            '{',
-            keys.length > MAX_OBJECT_KEYS_LENGTH ? `#${keys.length}` : keys.join(', '),
-            '}',
-          ].filter(Boolean).join(' '))
+          content = chalk.gray(' ... ')
         }
 
+        const length = options.length ? chalk.gray(`#${props.length} `) : ''
+
         return [
-          colorConstrName + chalk.gray('{'),
-          props.join(chalk.gray(`,${ newLineSym}`)) ,
-          (options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))) +
+          colorConstrName,
+          length,
+          chalk.gray('{'),
+          content,
           chalk.gray('}'),
-        ].join(newLineSym)
+        ].join('')
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       array: (arr: any[]) => {
-        if (!arr.length) {
-          return chalk.magenta('[]')
-        }
-
-
-        if (options.deep && currentDeep >= options.deep) {
-          return chalk.magenta(`[ #${ arr.length} ]`)
-        }
-
-        const content = arr
+        let content = arr
           .map((el) => ConsoleDirection.stringify(el, options, currentDeep + 1))
           .join(chalk.gray(', '))
 
+        if (options.deep && currentDeep >= options.deep) {
+          content = chalk.gray(' ... ')
+        }
+
+
+        const length = options.length ? chalk.gray(`#${arr.length} `) : ''
+
         return [
+          length,
           chalk.gray('['),
           content,
           chalk.gray(']'),
@@ -165,7 +167,14 @@ export class ConsoleDirection implements ILoggerDirection {
           str = str.replace(/\s/g,(sym) => LINE_TERMINATORS_MAP[sym] || sym)
         }
 
-        return chalk.green(str)
+        const length = options.length ? chalk.gray(`#${str.length} `) : ''
+
+        return [
+          length,
+          chalk.gray('\''),
+          chalk.green(str),
+          chalk.gray('\''),
+        ].join('')
       },
       // eslint-disable-next-line @typescript-eslint/ban-types
       function: (fn: Function) => {

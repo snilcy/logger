@@ -25,4 +25,5 @@ export const DEFAULT_OPTIONS: IConsoleDirectionOptions = {
   excludeKeys: [],
   only: [],
   lineTerminators: false,
+  length: false,
 }

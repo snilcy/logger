@@ -13,4 +13,5 @@ export interface IConsoleDirectionOptions {
   excludeKeys?: string[],
   only?: string[],
   lineTerminators?: boolean,
+  length?: boolean,
 }
