@@ -1,11 +1,11 @@
 import { LoggerColorMap } from '../../const.js';
 import { Chalk } from 'chalk';
-import { getConstructorName, isArray, isError, isNull, isUndefined, merge, } from '@snilcy/cake';
+import { getConstructorName, isArray, isError, isNull, isUndefined, shallowMerge, } from '@snilcy/cake';
 import { SHIFT, LINE_TERMINATORS_MAP, DEFAULT_OPTIONS, } from './const.js';
 export class ConsoleDirection {
     options = DEFAULT_OPTIONS;
     constructor(options) {
-        this.options = merge(this.options, options);
+        this.options = shallowMerge(this.options, options);
     }
     format(body) {
         if (this.options.format) {
@@ -27,7 +27,7 @@ export class ConsoleDirection {
     }
     static stringify = (data, options = DEFAULT_OPTIONS, currentDeep = 0) => {
         if (options) {
-            options = merge(DEFAULT_OPTIONS, options);
+            options = shallowMerge(DEFAULT_OPTIONS, options);
         }
         const chalk = new Chalk({ level: options.color ? 3 : 0 });
         const TypeHandler = {
@@ -58,7 +58,7 @@ export class ConsoleDirection {
                         optionsKeysStr.startsWith(onlyKey))) {
                         continue;
                     }
-                    const resValue = ConsoleDirection.stringify(value, merge(options, { keys: optionsKeys }), currentDeep + 1);
+                    const resValue = ConsoleDirection.stringify(value, shallowMerge(options, { keys: optionsKeys }), currentDeep + 1);
                     props.push([
                         options.oneline ? '' : SHIFT.repeat(currentDeep),
                         key,
@@ -67,8 +67,8 @@ export class ConsoleDirection {
                         resValue,
                     ].join(''));
                 }
-                const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj)} `;
-                const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName);
+                const constrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj)} `;
+                const colorConstrName = isError(obj) ? chalk.red(constrName) : chalk.magenta(constrName);
                 const newLineSym = options.oneline ? '' : '\n';
                 const closeRhift = options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0));
                 let content = props.length ? [
@@ -96,8 +96,10 @@ export class ConsoleDirection {
                 if (options.deep && currentDeep >= options.deep) {
                     content = chalk.gray(' ... ');
                 }
+                const constrName = getConstructorName(arr);
                 const length = options.length ? chalk.gray(`#${arr.length} `) : '';
                 return [
+                    constrName,
                     length,
                     chalk.gray('['),
                     content,

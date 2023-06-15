@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "nodemon ./test/index.js",
-    "watch": "tsc --watch",
+    "tsc": "tsc --watch",
     "build": "tsc"
   },
   "keywords": [],

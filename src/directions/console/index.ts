@@ -11,12 +11,11 @@ import {
   isError,
   isNull,
   isUndefined,
-  merge,
+  shallowMerge,
 } from '@snilcy/cake'
 
 import {
   SHIFT,
-  MAX_OBJECT_KEYS_LENGTH,
   LINE_TERMINATORS_MAP,
   DEFAULT_OPTIONS,
 } from './const.js'
@@ -25,7 +24,7 @@ export class ConsoleDirection implements ILoggerDirection {
   private options: IConsoleDirectionOptions = DEFAULT_OPTIONS
 
   constructor(options: IConsoleDirectionOptions) {
-    this.options = merge(this.options, options)
+    this.options = shallowMerge(this.options, options)
   }
 
   private format(body: ILoggerMessage) {
@@ -53,7 +52,7 @@ export class ConsoleDirection implements ILoggerDirection {
 
   static stringify = (data: ILoggerMessage['data'], options: IConsoleDirectionOptions = DEFAULT_OPTIONS, currentDeep = 0): string => {
     if (options) {
-      options = merge(DEFAULT_OPTIONS, options)
+      options = shallowMerge(DEFAULT_OPTIONS, options)
     }
 
     const chalk = new Chalk({ level: options.color ? 3 : 0 })
@@ -77,6 +76,7 @@ export class ConsoleDirection implements ILoggerDirection {
           const optionsKeys = (options.keys || []).concat(key)
           const optionsKeysStr = optionsKeys.join('.')
 
+
           if (isUndefined(value) && !options.undefined) {
             continue
           }
@@ -98,7 +98,7 @@ export class ConsoleDirection implements ILoggerDirection {
 
           const resValue = ConsoleDirection.stringify(
             value,
-            merge(options, { keys: optionsKeys }),
+            shallowMerge(options, { keys: optionsKeys }),
             currentDeep + 1,
           )
 
@@ -111,8 +111,8 @@ export class ConsoleDirection implements ILoggerDirection {
           ].join(''))
         }
 
-        const cnstrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
-        const colorConstrName = isError(obj) ? chalk.red(cnstrName) : chalk.magenta(cnstrName)
+        const constrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
+        const colorConstrName = isError(obj) ? chalk.red(constrName) : chalk.magenta(constrName)
 
         const newLineSym = options.oneline ? '' : '\n'
         const closeRhift = options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))
@@ -148,10 +148,11 @@ export class ConsoleDirection implements ILoggerDirection {
           content = chalk.gray(' ... ')
         }
 
-
+        const constrName = getConstructorName(arr)
         const length = options.length ? chalk.gray(`#${arr.length} `) : ''
 
         return [
+          constrName,
           length,
           chalk.gray('['),
           content,
