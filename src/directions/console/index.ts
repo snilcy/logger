@@ -152,7 +152,7 @@ export class ConsoleDirection implements ILoggerDirection {
         const length = options.length ? chalk.gray(`#${arr.length} `) : ''
 
         return [
-          constrName,
+          constrName === 'Array' ? '' : constrName,
           length,
           chalk.gray('['),
           content,

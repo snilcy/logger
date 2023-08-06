@@ -99,7 +99,7 @@ export class ConsoleDirection {
                 const constrName = getConstructorName(arr);
                 const length = options.length ? chalk.gray(`#${arr.length} `) : '';
                 return [
-                    constrName,
+                    constrName === 'Array' ? '' : constrName,
                     length,
                     chalk.gray('['),
                     content,
