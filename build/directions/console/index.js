@@ -29,7 +29,9 @@ export class ConsoleDirection {
         if (options) {
             options = shallowMerge(DEFAULT_OPTIONS, options);
         }
-        const chalk = new Chalk({ level: options.color ? 3 : 0 });
+        const chalk = new Chalk({
+            level: options.color ? 3 : 0,
+        });
         const TypeHandler = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             object: (obj) => {
@@ -58,7 +60,9 @@ export class ConsoleDirection {
                         optionsKeysStr.startsWith(onlyKey))) {
                         continue;
                     }
-                    const resValue = ConsoleDirection.stringify(value, shallowMerge(options, { keys: optionsKeys }), currentDeep + 1);
+                    const resValue = ConsoleDirection.stringify(value, shallowMerge(options, {
+                        keys: optionsKeys,
+                    }), currentDeep + 1);
                     props.push([
                         options.oneline ? '' : SHIFT.repeat(currentDeep),
                         key,

@@ -55,7 +55,9 @@ export class ConsoleDirection implements ILoggerDirection {
       options = shallowMerge(DEFAULT_OPTIONS, options)
     }
 
-    const chalk = new Chalk({ level: options.color ? 3 : 0 })
+    const chalk = new Chalk({
+      level: options.color ? 3 : 0,
+    })
 
     const TypeHandler = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,7 +100,9 @@ export class ConsoleDirection implements ILoggerDirection {
 
           const resValue = ConsoleDirection.stringify(
             value,
-            shallowMerge(options, { keys: optionsKeys }),
+            shallowMerge(options, {
+              keys: optionsKeys,
+            }),
             currentDeep + 1,
           )
 
@@ -159,11 +163,11 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray(']'),
         ].join('')
       },
-      null: () => chalk.red('null'),
-      boolean: (bool: boolean) => chalk.yellow(bool),
-      number: (num: number) => chalk.blue(num),
+      null     : () => chalk.red('null'),
+      boolean  : (bool: boolean) => chalk.yellow(bool),
+      number   : (num: number) => chalk.blue(num),
       undefined: (und: undefined) => chalk.gray(und),
-      string: (str: string) => {
+      string   : (str: string) => {
         if (options.lineTerminators) {
           str = str.replace(/\s/g,(sym) => LINE_TERMINATORS_MAP[sym] || sym)
         }
