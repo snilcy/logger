@@ -14,7 +14,11 @@ import {
   shallowMerge,
 } from '@snilcy/cake'
 
-import { SHIFT, LINE_TERMINATORS_MAP, DEFAULT_OPTIONS } from './const'
+import {
+  SHIFT,
+  LINE_TERMINATORS_MAP,
+  DEFAULT_OPTIONS,
+} from './const'
 
 export class ConsoleDirection implements ILoggerDirection {
   private options: IConsoleDirectionOptions = DEFAULT_OPTIONS
@@ -55,7 +59,9 @@ export class ConsoleDirection implements ILoggerDirection {
     }
 
     const chalk = new Chalk({
-      level: options.color ? 3 : 0,
+      level: options.color
+        ? 3
+        : 0,
     })
 
     const TypeHandler = {
@@ -107,9 +113,7 @@ export class ConsoleDirection implements ILoggerDirection {
 
           const resValue = ConsoleDirection.stringify(
             value,
-            shallowMerge(options, {
-              keys: optionsKeys,
-            }),
+            shallowMerge(options, { keys: optionsKeys }),
             currentDeep + 1,
           )
 
@@ -130,6 +134,7 @@ export class ConsoleDirection implements ILoggerDirection {
           getConstructorName(obj) === 'Object'
             ? ''
             : `${getConstructorName(obj)} `
+
         const colorConstrName = isError(obj)
           ? chalk.red(constrName)
           : chalk.magenta(constrName)
@@ -180,11 +185,11 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray(']'),
         ].join('')
       },
-      null: () => chalk.red('null'),
-      boolean: (bool: boolean) => chalk.yellow(bool),
-      number: (num: number) => chalk.blue(num),
+      null     : () => chalk.red('null'),
+      boolean  : (bool: boolean) => chalk.yellow(bool),
+      number   : (num: number) => chalk.blue(num),
       undefined: (und: undefined) => chalk.gray(und),
-      string: (str: string) => {
+      string   : (str: string) => {
         if (options.lineTerminators) {
           str = str.replace(/\s/g, (sym) => LINE_TERMINATORS_MAP[sym] || sym)
         }
@@ -198,7 +203,6 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray("'"),
         ].join('')
       },
-      // eslint-disable-next-line @typescript-eslint/ban-types
       function: (fn: Function) => {
         const result = [fn.name || '(anonymous)']
 

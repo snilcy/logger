@@ -1,12 +1,13 @@
-import { isArray, shallowMerge } from '@snilcy/cake'
+import {
+  isArray,
+  shallowMerge,
+} from '@snilcy/cake'
 import { LoggerLevel } from './const.js'
 import type { ILoggerDirection } from './directions/types.js'
 import { ILoggerMessage } from './types.js'
 import { ConsoleDirection } from './directions/index.js'
 
-const LoggerDirections = {
-  console: ConsoleDirection,
-}
+const LoggerDirections = { console: ConsoleDirection }
 
 type LoggerDirectionsType = typeof LoggerDirections
 
@@ -26,8 +27,9 @@ type INamespaceParam = string | string[]
 
 export class Logger {
   private disabled = false
-  private namespace: string[] = []
-  private directions: ILoggerDirectionsInstance = {}
+
+  private namespace     : string[] = []
+  private directions    : ILoggerDirectionsInstance = {}
   private directionsArgs: ILoggerDirectionsArgs = {}
 
   constructor(

@@ -14,16 +14,16 @@ export const LINE_TERMINATORS_MAP: {
 }
 
 export const DEFAULT_OPTIONS: IConsoleDirectionOptions = {
-  prefix: '->',
-  deep: MAX_DEEP_DEFAULT,
-  color: true,
-  oneline: false,
-  align: false,
-  undefined: true,
-  keys: [],
-  excludePath: [],
-  excludeKeys: [],
-  only: [],
+  prefix         : '->',
+  deep           : MAX_DEEP_DEFAULT,
+  color          : true,
+  oneline        : false,
+  align          : false,
+  undefined      : true,
+  keys           : [],
+  excludePath    : [],
+  excludeKeys    : [],
+  only           : [],
   lineTerminators: false,
-  length: false,
+  length         : false,
 }
