@@ -1,9 +1,9 @@
-import type { ILoggerDirection } from '../types.js'
-import type { ILoggerMessage } from '../../types.js'
-import type { IConsoleDirectionOptions } from './types.js'
+import type { ILoggerDirection } from '../types';
+import type { ILoggerMessage } from '../../types';
+import type { IConsoleDirectionOptions } from './types';
 
-import { LoggerColorMap } from '../../const.js'
-import { Chalk } from 'chalk'
+import { LoggerColorMap } from '../../const';
+import { Chalk } from 'chalk';
 
 import {
   getConstructorName,
@@ -12,27 +12,23 @@ import {
   isNull,
   isUndefined,
   shallowMerge,
-} from '@snilcy/cake'
+} from '@snilcy/cake';
 
-import {
-  SHIFT,
-  LINE_TERMINATORS_MAP,
-  DEFAULT_OPTIONS,
-} from './const.js'
+import { SHIFT, LINE_TERMINATORS_MAP, DEFAULT_OPTIONS } from './const';
 
 export class ConsoleDirection implements ILoggerDirection {
-  private options: IConsoleDirectionOptions = DEFAULT_OPTIONS
+  private options: IConsoleDirectionOptions = DEFAULT_OPTIONS;
 
   constructor(options: IConsoleDirectionOptions) {
-    this.options = shallowMerge(this.options, options)
+    this.options = shallowMerge(this.options, options);
   }
 
   private format(body: ILoggerMessage) {
     if (this.options.format) {
-      return this.options.format(body)
+      return this.options.format(body);
     }
 
-    const { level, data, namespace } = body
+    const { level, data, namespace } = body;
 
     return [
       LoggerColorMap[level](this.options.prefix),
@@ -41,61 +37,72 @@ export class ConsoleDirection implements ILoggerDirection {
     ]
       .filter(Boolean)
       .flat(3)
-      .join(' ')
-
+      .join(' ');
   }
 
   act(body: ILoggerMessage) {
-    const content = this.format(body)
-    console.log(content)
+    const content = this.format(body);
+    console.log(content);
   }
 
-  static stringify = (data: ILoggerMessage['data'], options: IConsoleDirectionOptions = DEFAULT_OPTIONS, currentDeep = 0): string => {
+  static stringify = (
+    data: ILoggerMessage['data'],
+    options: IConsoleDirectionOptions = DEFAULT_OPTIONS,
+    currentDeep = 0,
+  ): string => {
     if (options) {
-      options = shallowMerge(DEFAULT_OPTIONS, options)
+      options = shallowMerge(DEFAULT_OPTIONS, options);
     }
 
     const chalk = new Chalk({
       level: options.color ? 3 : 0,
-    })
+    });
 
     const TypeHandler = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       object: (obj: any) => {
-        const props: string[] = []
-        const keys = Object.keys(obj)
-        const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
+        const props: string[] = [];
+        const keys = Object.keys(obj);
+        const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0];
 
-        keys.sort()
+        keys.sort();
 
         if (isError(obj)) {
-          keys.unshift('message')
+          keys.unshift('message');
         }
 
-
         for (const key of keys) {
-          const value = obj[key]
-          const optionsKeys = (options.keys || []).concat(key)
-          const optionsKeysStr = optionsKeys.join('.')
-
+          const value = obj[key];
+          const optionsKeys = (options.keys || []).concat(key);
+          const optionsKeysStr = optionsKeys.join('.');
 
           if (isUndefined(value) && !options.undefined) {
-            continue
+            continue;
           }
 
-          if (options.excludePath && options.excludePath.includes(optionsKeysStr)) {
-            continue
+          if (
+            options.excludePath &&
+            options.excludePath.includes(optionsKeysStr)
+          ) {
+            continue;
           }
 
           if (options.excludeKeys && options.excludeKeys.includes(key)) {
-            continue
+            continue;
           }
 
-          if (options.only && options.only.length && !options.only.find((onlyKey) => // only
-            onlyKey.startsWith(optionsKeysStr) ||
-              optionsKeysStr.startsWith(onlyKey))
+          if (
+            options.only &&
+            options.only.length &&
+            !options.only.find(
+              (
+                onlyKey, // only
+              ) =>
+                onlyKey.startsWith(optionsKeysStr) ||
+                optionsKeysStr.startsWith(onlyKey),
+            )
           ) {
-            continue
+            continue;
           }
 
           const resValue = ConsoleDirection.stringify(
@@ -104,35 +111,45 @@ export class ConsoleDirection implements ILoggerDirection {
               keys: optionsKeys,
             }),
             currentDeep + 1,
-          )
+          );
 
-          props.push([
-            options.oneline ? '' : SHIFT.repeat(currentDeep),
-            key,
-            chalk.gray(':'),
-            options.oneline || !options.align ? ' ' : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
-            resValue,
-          ].join(''))
+          props.push(
+            [
+              options.oneline ? '' : SHIFT.repeat(currentDeep),
+              key,
+              chalk.gray(':'),
+              options.oneline || !options.align
+                ? ' '
+                : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
+              resValue,
+            ].join(''),
+          );
         }
 
-        const constrName = getConstructorName(obj) === 'Object' ? '' : `${getConstructorName(obj) } `
-        const colorConstrName = isError(obj) ? chalk.red(constrName) : chalk.magenta(constrName)
+        const constrName =
+          getConstructorName(obj) === 'Object'
+            ? ''
+            : `${getConstructorName(obj)} `;
+        const colorConstrName = isError(obj)
+          ? chalk.red(constrName)
+          : chalk.magenta(constrName);
 
-        const newLineSym = options.oneline ? '' : '\n'
-        const closeRhift = options.oneline ? '' : SHIFT.repeat(Math.max(currentDeep - 1, 0))
+        const newLineSym = options.oneline ? '' : '\n';
+        const closeRhift = options.oneline
+          ? ''
+          : SHIFT.repeat(Math.max(currentDeep - 1, 0));
 
-        let content = props.length ? [
-          '',
-          props.join(chalk.gray(`,${ newLineSym}`)),
-          closeRhift,
-        ].join(newLineSym) : ''
-
+        let content = props.length
+          ? ['', props.join(chalk.gray(`,${newLineSym}`)), closeRhift].join(
+              newLineSym,
+            )
+          : '';
 
         if (options.deep && currentDeep >= options.deep) {
-          content = chalk.gray(' ... ')
+          content = chalk.gray(' ... ');
         }
 
-        const length = options.length ? chalk.gray(`#${props.length} `) : ''
+        const length = options.length ? chalk.gray(`#${props.length} `) : '';
 
         return [
           colorConstrName,
@@ -140,20 +157,20 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray('{'),
           content,
           chalk.gray('}'),
-        ].join('')
+        ].join('');
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       array: (arr: any[]) => {
         let content = arr
           .map((el) => ConsoleDirection.stringify(el, options, currentDeep + 1))
-          .join(chalk.gray(', '))
+          .join(chalk.gray(', '));
 
         if (options.deep && currentDeep >= options.deep) {
-          content = chalk.gray(' ... ')
+          content = chalk.gray(' ... ');
         }
 
-        const constrName = getConstructorName(arr)
-        const length = options.length ? chalk.gray(`#${arr.length} `) : ''
+        const constrName = getConstructorName(arr);
+        const length = options.length ? chalk.gray(`#${arr.length} `) : '';
 
         return [
           constrName === 'Array' ? '' : constrName,
@@ -161,51 +178,51 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray('['),
           content,
           chalk.gray(']'),
-        ].join('')
+        ].join('');
       },
-      null     : () => chalk.red('null'),
-      boolean  : (bool: boolean) => chalk.yellow(bool),
-      number   : (num: number) => chalk.blue(num),
+      null: () => chalk.red('null'),
+      boolean: (bool: boolean) => chalk.yellow(bool),
+      number: (num: number) => chalk.blue(num),
       undefined: (und: undefined) => chalk.gray(und),
-      string   : (str: string) => {
+      string: (str: string) => {
         if (options.lineTerminators) {
-          str = str.replace(/\s/g,(sym) => LINE_TERMINATORS_MAP[sym] || sym)
+          str = str.replace(/\s/g, (sym) => LINE_TERMINATORS_MAP[sym] || sym);
         }
 
-        const length = options.length ? chalk.gray(`#${str.length} `) : ''
+        const length = options.length ? chalk.gray(`#${str.length} `) : '';
 
         return [
           length,
-          chalk.gray('\''),
+          chalk.gray("'"),
           chalk.green(str),
-          chalk.gray('\''),
-        ].join('')
+          chalk.gray("'"),
+        ].join('');
       },
       // eslint-disable-next-line @typescript-eslint/ban-types
       function: (fn: Function) => {
-        const result = [fn.name || '(anonymous)']
+        const result = [fn.name || '(anonymous)'];
 
         if (Object.getPrototypeOf(fn)) {
-          result.push(Object.getPrototypeOf(fn).name)
+          result.push(Object.getPrototypeOf(fn).name);
         }
 
-        return chalk.magenta(result.filter(Boolean).join(' <  '))
+        return chalk.magenta(result.filter(Boolean).join(' <  '));
       },
       bigint: (val: bigint) => val.toString(),
       symbol: (val: symbol) => val.toString(),
-    }
+    };
 
     if (isNull(data)) {
-      return TypeHandler.null()
+      return TypeHandler.null();
     }
 
     if (isArray(data)) {
-      return TypeHandler.array(data)
+      return TypeHandler.array(data);
     }
 
-    const type = typeof data
-    const typeHandler = TypeHandler[type]
+    const type = typeof data;
+    const typeHandler = TypeHandler[type];
 
-    return typeHandler(data)
-  }
+    return typeHandler(data);
+  };
 }

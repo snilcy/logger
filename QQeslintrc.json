@@ -1,0 +1,46 @@
+{
+  "ignorePatterns": ["node_modules/*", "build/*"],
+  "globals": {
+    "imports": true,
+    "global": true,
+    "log": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "env": {},
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": ["@snilcy/eslint-config/typescript"],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": false
+      }
+    ],
+    "no-use-before-define": [
+      "warn",
+      {
+        "classes": false
+      }
+    ],
+    "camelcase": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/triple-slash-reference": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/no-unnecessary-type-constraint": "off",
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "extendDefaults": true,
+        "types": {
+          "{}": false
+        }
+      }
+    ]
+  }
+}

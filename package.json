@@ -2,7 +2,7 @@
   "name": "@snilcy/logger",
   "version": "2.14.2",
   "description": "",
-  "exports": "./build/index.js",
+  "exports": "./src/index.ts",
   "type": "module",
   "engines": {
     "node": ">=16"
@@ -17,13 +17,15 @@
   "license": "ISC",
   "dependencies": {
     "@snilcy/cake": "snilcy/cake",
-    "chalk": "^5.2.0"
+    "chalk": "^5.2.0",
+    "prettier": "^3.1.0"
   },
   "devDependencies": {
-    "@snilcy/eslint-config": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "eslint": "^8.37.0",
+    "@stylistic/eslint-plugin": "^1.4.1",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0",
+    "eslint-plugin-prettier": "^5.0.1",
     "express": "^4.18.2",
     "nodemon": "^2.0.22",
     "typescript": "^5.1.3"

@@ -1,17 +1,17 @@
-import type { IConsoleDirectionOptions } from './types.js'
+import type { IConsoleDirectionOptions } from './types';
 
-export const SHIFT = ' '.repeat(2)
+export const SHIFT = ' '.repeat(2);
 
-export const MAX_OBJECT_KEYS_LENGTH = 5
+export const MAX_OBJECT_KEYS_LENGTH = 5;
 
-export const MAX_DEEP_DEFAULT = 3
+export const MAX_DEEP_DEFAULT = 3;
 
 export const LINE_TERMINATORS_MAP: {
-  [index: string]: string
+  [index: string]: string;
 } = {
   '\r': '\\r',
   '\n': '\\n',
-}
+};
 
 export const DEFAULT_OPTIONS: IConsoleDirectionOptions = {
   prefix: '->',
@@ -26,4 +26,4 @@ export const DEFAULT_OPTIONS: IConsoleDirectionOptions = {
   only: [],
   lineTerminators: false,
   length: false,
-}
+};
