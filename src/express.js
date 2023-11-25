@@ -1,13 +1,13 @@
-import { Logger, ConsoleDirection } from './index';
+import { Logger, ConsoleDirection } from './index'
 
 export const express = (title = 'REST') => {
   const logger = new Logger({
     directions: [new ConsoleDirection()],
     namespace: [title],
-  });
+  })
 
   return (req, res, next) => {
-    req.port = res.socket.localPort;
+    req.port = res.socket.localPort
 
     logger.debug(
       req.method,
@@ -15,8 +15,8 @@ export const express = (title = 'REST') => {
         '',
       ),
       req.body,
-    );
+    )
 
-    next();
-  };
-};
+    next()
+  }
+}

@@ -1,5 +1,5 @@
-import { ILoggerMessage } from '../types';
+import { ILoggerMessage } from '../types'
 
 export interface ILoggerDirection {
-  act: (message: ILoggerMessage) => void;
+  act: (message: ILoggerMessage) => void
 }
