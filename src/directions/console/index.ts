@@ -145,7 +145,11 @@ export class ConsoleDirection implements ILoggerDirection {
           : SHIFT.repeat(Math.max(currentDeep - 1, 0))
 
         let content = props.length
-          ? ['', props.join(chalk.gray(`,${newLineSym}`)), closeRhift].join(
+          ? [
+              '',
+              props.join(chalk.gray(`,${newLineSym}`)),
+              closeRhift,
+            ].join(
               newLineSym,
             )
           : ''

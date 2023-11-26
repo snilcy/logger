@@ -8,15 +8,13 @@ const logger = new Logger('Root', {
     // indent: 20,
     // color: false,
     // oneline: true,
-    deep: 5,
+    deep           : 5,
     // align: false,
     // undefined: false,
     lineTerminators: false,
     // excludeKeys: ['arr'],
-    length: false,
-    only: [
-      'telegram.options.match',
-    ],
+    length         : false,
+    only           : ['telegram.options.match'],
   },
 })
 
@@ -30,9 +28,69 @@ class SomeError extends Error {
 const someError = new SomeError('Some error message')
 const lgr = new Logger()
 
-const data = { array: [ 1, 2, 3 ], emptyArr: [], 'context':{},'options':{ 'telegram':{},'handlerTimeout':90000 },'telegram':{ 'token':'5985340756:AAHs2uixjfZIZyK8GiVBYo-dHdxpLWV5amc','options':{ 'apiRoot':'https://api.telegram.org','apiMode':'bot','webhookReply':true,'agent':{ '_events':{},'_eventsCount':2,'defaultPort':undefined,'protocol':'https:','options':{ 'keepAlive':true,'keepAliveMsecs':10000,'noDelay':true,'path':null },'requests':{},'sockets':{},'freeSockets':{},'keepAliveMsecs':10000,'keepAlive':true,'maxSockets':null,'maxFreeSockets':256,'scheduling':'lifo','maxTotalSockets':null,'totalSocketCount':0,'maxCachedSessions':100,'_sessionCache':{ 'map':{},'list':[] }},'testEnv':false, 'fn': () => {}, 'func': console.clear, 'cls': Logger, 'console': 'consoleDirection', error, someError, lgr, undf: undefined, arr: [ 1 ,3 ,7 ],
-  match: ' '.match(/\s/),
-}}}
+const data = {
+  array: [
+    1,
+    2,
+    3,
+  ],
+  emptyArr: [],
+  context : {},
+  options : {
+    telegram      : {},
+    handlerTimeout: 90000,
+  },
+  telegram: {
+    token  : '5985340756:AAHs2uixjfZIZyK8GiVBYo-dHdxpLWV5amc',
+    options: {
+      apiRoot     : 'https://api.telegram.org',
+      apiMode     : 'bot',
+      webhookReply: true,
+      agent       : {
+        _events     : {},
+        _eventsCount: 2,
+        defaultPort : undefined,
+        protocol    : 'https:',
+        options     : {
+          keepAlive     : true,
+          keepAliveMsecs: 10000,
+          noDelay       : true,
+          path          : null,
+        },
+        requests         : {},
+        sockets          : {},
+        freeSockets      : {},
+        keepAliveMsecs   : 10000,
+        keepAlive        : true,
+        maxSockets       : null,
+        maxFreeSockets   : 256,
+        scheduling       : 'lifo',
+        maxTotalSockets  : null,
+        totalSocketCount : 0,
+        maxCachedSessions: 100,
+        _sessionCache    : {
+          map : {},
+          list: [],
+        },
+      },
+      testEnv: false,
+      fn     : () => {},
+      func   : console.clear,
+      cls    : Logger,
+      console: 'consoleDirection',
+      error,
+      someError,
+      lgr,
+      undf   : undefined,
+      arr    : [
+        1,
+        3,
+        7,
+      ],
+      match: ' '.match(/\s/),
+    },
+  },
+}
 
 // const data = {
 //   error,
@@ -63,7 +121,6 @@ const data = { array: [ 1, 2, 3 ], emptyArr: [], 'context':{},'options':{ 'teleg
 // logger.info('info')
 // logger.warn('warn')
 // logger.error('error')
-
 
 const r = logger.ns('🚀')
 // r.disabled = true

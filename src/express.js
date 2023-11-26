@@ -14,11 +14,14 @@ export const express = (title = 'REST') => {
 
     logger.debug(
       req.method,
-      [req.protocol, '://', req.hostname, ':', req.port, req.originalUrl].join(
-        '',
-      ),
-      req.body,
-    )
+      [
+        req.protocol,
+        '://',
+        req.hostname,
+        ':',
+        req.port,
+        req.originalUrl,
+      ].join(''), req.body)
 
     next()
   }
