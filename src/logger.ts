@@ -109,12 +109,16 @@ export class Logger {
     // console.log('Logger.ns', { namespace })
 
     const ns: string[] = [...this.namespace, ...toArray(namespace)]
+    const options: ILoggerDirectionsArguments = {
+      ...this.directionsArguments,
+      ...directionsArguments,
+      console: shallowMerge(
+        this.directionsArguments.console || {},
+        directionsArguments.console || {},
+      ),
+    }
 
-    return new Logger(
-      ns,
-      shallowMerge(this.directionsArguments, directionsArguments),
-      this.parametrs,
-    )
+    return new Logger(ns, options, this.parametrs)
   }
 
   warn(...args: ILoggerMessage['data']) {
