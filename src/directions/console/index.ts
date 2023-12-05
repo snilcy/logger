@@ -1,10 +1,4 @@
-import type { ILoggerDirection } from '../types'
-import type { ILoggerMessage } from '../../types'
-import type { IConsoleDirectionOptions } from './types'
-
-import { LoggerColorMap } from '../../const'
-import { Chalk } from 'chalk'
-
+/* eslint-disable unicorn/explicit-length-check */
 import {
   getConstructorName,
   isArray,
@@ -13,18 +7,23 @@ import {
   isUndefined,
   shallowMerge,
 } from '@snilcy/cake'
+import { Chalk } from 'chalk'
 
-import {
-  SHIFT,
-  LINE_TERMINATORS_MAP,
-  DEFAULT_OPTIONS,
-} from './const'
+import { LoggerColorMap } from '../../const'
+
+import { DEFAULT_OPTIONS, LINE_TERMINATORS_MAP, SHIFT } from './const'
+
+import type { ILoggerMessage } from '../../types'
+import type { ILoggerDirection } from '../types'
+
+import type { IConsoleDirectionOptions } from './types'
 
 export class ConsoleDirection implements ILoggerDirection {
-  private options: IConsoleDirectionOptions = DEFAULT_OPTIONS
+  private options: Required<IConsoleDirectionOptions> = DEFAULT_OPTIONS
 
   constructor(options: IConsoleDirectionOptions) {
     this.options = shallowMerge(this.options, options)
+    // console.log('ConsoleDirection.constructor', this.options)
   }
 
   private format(body: ILoggerMessage) {
@@ -32,7 +31,7 @@ export class ConsoleDirection implements ILoggerDirection {
       return this.options.format(body)
     }
 
-    const { level, data, namespace } = body
+    const { data, level, namespace } = body
 
     return [
       LoggerColorMap[level](this.options.prefix),
@@ -51,71 +50,120 @@ export class ConsoleDirection implements ILoggerDirection {
 
   static stringify = (
     data: ILoggerMessage['data'],
-    options: IConsoleDirectionOptions = DEFAULT_OPTIONS,
+    options: Required<IConsoleDirectionOptions> = DEFAULT_OPTIONS,
     currentDeep = 0,
+    objectCache = new Map<object, any>(),
   ): string => {
     if (options) {
       options = shallowMerge(DEFAULT_OPTIONS, options)
     }
 
     const chalk = new Chalk({
-      level: options.color
-        ? 3
-        : 0,
+      level: options.color ? 3 : 0,
     })
+
+    if (objectCache.has(data)) {
+      return chalk.blueBright(
+        ['Circular<', getConstructorName(data), '>'].join(''),
+      )
+    }
 
     const TypeHandler = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      object: (obj: any) => {
+      array: (array: any[]) => {
+        let content = array
+          .map((element) =>
+            ConsoleDirection.stringify(
+              element,
+              options,
+              currentDeep + 1,
+              objectCache,
+            ),
+          )
+          .join(chalk.gray(', '))
+
+        if (options.deep && currentDeep >= options.deep) {
+          content = chalk.gray(' ... ')
+        }
+
+        const constrName = getConstructorName(array)
+        // eslint-disable-next-line unicorn/explicit-length-check
+        const length = options.length ? chalk.gray(`#${array.length} `) : ''
+
+        return [
+          constrName === 'Array' ? '' : constrName,
+          length,
+          chalk.gray('['),
+          content,
+          chalk.gray(']'),
+        ].join('')
+      },
+      bigint: (value: bigint) => value.toString(),
+      boolean: (bool: boolean) => chalk.yellow(bool),
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      function: (functionToColorize: Function) => {
+        const result = [functionToColorize.name || '(anonymous)']
+
+        if (Object.getPrototypeOf(functionToColorize)) {
+          result.push(Object.getPrototypeOf(functionToColorize).name)
+        }
+
+        return chalk.magenta(result.filter(Boolean).join(' <  '))
+      },
+      null: () => chalk.red('null'),
+      number: (numberToColorize: number) => chalk.blue(numberToColorize),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      object: (object: any) => {
         const props: string[] = []
-        const keys = Object.keys(obj)
+        const keys = Object.keys(object)
         const maxLengthItem = keys.sort((a, b) => b.length - a.length)[0]
 
         keys.sort()
 
-        if (isError(obj)) {
+        if (isError(object)) {
           keys.unshift('message')
         }
 
         for (const key of keys) {
-          const value = obj[key]
-          const optionsKeys = (options.keys || []).concat(key)
-          const optionsKeysStr = optionsKeys.join('.')
+          const value = object[key]
+          const optionsKeys = [...options.keys, key]
+          const optionsKeysString = optionsKeys.join('.')
 
           if (isUndefined(value) && !options.undefined) {
             continue
           }
 
           if (
-            options.excludePath &&
-            options.excludePath.includes(optionsKeysStr)
-          ) {
-            continue
-          }
-
-          if (options.excludeKeys && options.excludeKeys.includes(key)) {
-            continue
-          }
-
-          if (
             options.only &&
-            options.only.length &&
-            !options.only.find(
+            options.only.length > 0 &&
+            !options.only.some(
               (
                 onlyKey, // only
               ) =>
-                onlyKey.startsWith(optionsKeysStr) ||
-                optionsKeysStr.startsWith(onlyKey),
+                onlyKey.startsWith(optionsKeysString) ||
+                optionsKeysString.startsWith(onlyKey),
             )
           ) {
             continue
           }
 
-          const resValue = ConsoleDirection.stringify(
+          let resultValue = ConsoleDirection.stringify(
             value,
             shallowMerge(options, { keys: optionsKeys }),
             currentDeep + 1,
+            objectCache,
           )
+
+          if (
+            options.excludePath &&
+            options.excludePath.includes(optionsKeysString)
+          ) {
+            resultValue = chalk.gray('excludePath')
+          } else if (options.excludeKeys && options.excludeKeys.includes(key)) {
+            resultValue = chalk.gray('excludeKeys')
+          } else {
+            objectCache.set(data, true)
+          }
 
           props.push(
             [
@@ -125,34 +173,33 @@ export class ConsoleDirection implements ILoggerDirection {
               options.oneline || !options.align
                 ? ' '
                 : chalk.gray('.'.repeat(1 + maxLengthItem.length - key.length)),
-              resValue,
+              resultValue,
             ].join(''),
           )
         }
 
         const constrName =
-          getConstructorName(obj) === 'Object'
+          getConstructorName(object) === 'Object'
             ? ''
-            : `${getConstructorName(obj)} `
+            : `${getConstructorName(object)} `
 
-        const colorConstrName = isError(obj)
+        const colorConstrName = isError(object)
           ? chalk.red(constrName)
           : chalk.magenta(constrName)
 
         const newLineSym = options.oneline ? '' : '\n'
-        const closeRhift = options.oneline
+        const closeBracketShift = options.oneline
           ? ''
           : SHIFT.repeat(Math.max(currentDeep - 1, 0))
 
-        let content = props.length
-          ? [
-              '',
-              props.join(chalk.gray(`,${newLineSym}`)),
-              closeRhift,
-            ].join(
-              newLineSym,
-            )
-          : ''
+        let content =
+          props.length > 0
+            ? [
+                '',
+                props.join(chalk.gray(`,${newLineSym}`)),
+                closeBracketShift,
+              ].join(newLineSym)
+            : ''
 
         if (options.deep && currentDeep >= options.deep) {
           content = chalk.gray(' ... ')
@@ -168,56 +215,27 @@ export class ConsoleDirection implements ILoggerDirection {
           chalk.gray('}'),
         ].join('')
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      array: (arr: any[]) => {
-        let content = arr
-          .map((el) => ConsoleDirection.stringify(el, options, currentDeep + 1))
-          .join(chalk.gray(', '))
-
-        if (options.deep && currentDeep >= options.deep) {
-          content = chalk.gray(' ... ')
-        }
-
-        const constrName = getConstructorName(arr)
-        const length = options.length ? chalk.gray(`#${arr.length} `) : ''
-
-        return [
-          constrName === 'Array' ? '' : constrName,
-          length,
-          chalk.gray('['),
-          content,
-          chalk.gray(']'),
-        ].join('')
-      },
-      null     : () => chalk.red('null'),
-      boolean  : (bool: boolean) => chalk.yellow(bool),
-      number   : (num: number) => chalk.blue(num),
-      undefined: (und: undefined) => chalk.gray(und),
-      string   : (str: string) => {
+      string: (stringToColorize: string) => {
         if (options.lineTerminators) {
-          str = str.replace(/\s/g, (sym) => LINE_TERMINATORS_MAP[sym] || sym)
+          stringToColorize = stringToColorize.replaceAll(
+            /\s/g,
+            (sym) => LINE_TERMINATORS_MAP[sym] || sym,
+          )
         }
 
-        const length = options.length ? chalk.gray(`#${str.length} `) : ''
+        const length = options.length
+          ? chalk.gray(`#${stringToColorize.length} `)
+          : ''
 
         return [
           length,
           chalk.gray("'"),
-          chalk.green(str),
+          chalk.green(stringToColorize),
           chalk.gray("'"),
         ].join('')
       },
-      function: (fn: Function) => {
-        const result = [fn.name || '(anonymous)']
-
-        if (Object.getPrototypeOf(fn)) {
-          result.push(Object.getPrototypeOf(fn).name)
-        }
-
-        return chalk.magenta(result.filter(Boolean).join(' <  '))
-      },
-      bigint: (val: bigint) => val.toString(),
-      symbol: (val: symbol) => val.toString(),
+      symbol: (value: symbol) => value.toString(),
+      undefined: (und: undefined) => chalk.gray(und),
     }
 
     if (isNull(data)) {
@@ -229,7 +247,7 @@ export class ConsoleDirection implements ILoggerDirection {
     }
 
     const type = typeof data
-    const typeHandler = TypeHandler[type]
+    const typeHandler = TypeHandler[type] as (typeof TypeHandler)['number']
 
     return typeHandler(data)
   }

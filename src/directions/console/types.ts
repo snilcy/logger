@@ -1,17 +1,18 @@
 import { ILoggerMessage } from '../../types'
 
 export interface IConsoleDirectionOptions {
-  prefix?         : string
-  format?         : (body: ILoggerMessage) => string
-  deep?           : number
-  color?          : boolean
-  oneline?        : boolean
-  align?          : boolean
-  undefined?      : boolean
-  keys?           : string[]
-  excludePath?    : string[]
-  excludeKeys?    : string[]
-  only?           : string[]
+  align?: boolean
+  color?: boolean
+  deep?: number
+  excludeKeys?: string[]
+  excludePath?: string[]
+  filterNs?: string[]
+  format?: ((body: ILoggerMessage) => string) | null
+  keys?: string[]
+  length?: boolean
   lineTerminators?: boolean
-  length?         : boolean
+  oneline?: boolean
+  only?: string[]
+  prefix?: string
+  undefined?: boolean
 }

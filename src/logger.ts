@@ -1,49 +1,62 @@
-import {
-  isArray,
-  shallowMerge,
-} from '@snilcy/cake'
+import { deepMerge, isArray, shallowMerge, toArray } from '@snilcy/cake'
+
 import { LoggerLevel } from './const.js'
-import type { ILoggerDirection } from './directions/types.js'
-import { ILoggerMessage } from './types.js'
 import { ConsoleDirection } from './directions/index.js'
+import { ILoggerMessage } from './types.js'
+
+import type { ILoggerDirection } from './directions/types.js'
 
 const LoggerDirections = { console: ConsoleDirection }
 
-type LoggerDirectionsType = typeof LoggerDirections
+type ILoggerDirectionsType = typeof LoggerDirections
 
-type ILoggerDirectionsArgs = {
-  [Property in keyof LoggerDirectionsType]?: ConstructorParameters<
-    LoggerDirectionsType[Property]
+interface ILoggerParameters {
+  filterNS?: string[]
+}
+
+type ILoggerDirectionsArguments = {
+  [Property in keyof ILoggerDirectionsType]?: ConstructorParameters<
+    ILoggerDirectionsType[Property]
   >[0]
 }
 
 type ILoggerDirectionsInstance = {
-  [Property in keyof LoggerDirectionsType]?: InstanceType<
-    LoggerDirectionsType[Property]
+  [Property in keyof ILoggerDirectionsType]?: InstanceType<
+    ILoggerDirectionsType[Property]
   >
 }
 
-type INamespaceParam = string | string[]
+type INamespaceParameter = string | string[]
 
 export class Logger {
+  private directions: ILoggerDirectionsInstance = {}
+  private directionsArguments: ILoggerDirectionsArguments = {}
   private disabled = false
-
-  private namespace     : string[] = []
-  private directions    : ILoggerDirectionsInstance = {}
-  private directionsArgs: ILoggerDirectionsArgs = {}
+  private namespace: string[] = []
+  private parametrs: ILoggerParameters = { filterNS: [] }
 
   constructor(
-    namespace: INamespaceParam,
-    directionsArgs: ILoggerDirectionsArgs,
+    namespace: INamespaceParameter,
+    directionsArguments: ILoggerDirectionsArguments,
+    parameters: ILoggerParameters = {},
   ) {
-    this.namespace = isArray(namespace) ? namespace : [namespace]
-    this.directionsArgs = directionsArgs
+    this.namespace = (isArray(namespace) ? namespace : [namespace]).filter(
+      Boolean,
+    )
+    this.directionsArguments = directionsArguments
+    this.parametrs = shallowMerge(this.parametrs, parameters)
 
-    for (const key in directionsArgs) {
-      const directionName = key as keyof LoggerDirectionsType
-      const args = directionsArgs[directionName]
+    // console.log('Logger.constructor', {
+    //   directionsArguments: this.directionsArguments,
+    //   namespace: this.namespace,
+    //   parameters: this.parametrs,
+    // })
 
-      if (args) {
+    for (const key in directionsArguments) {
+      const directionName = key as keyof ILoggerDirectionsType
+      const args = directionsArguments[directionName]
+
+      if (args && LoggerDirections[directionName]) {
         this.directions[directionName] = new LoggerDirections[directionName](
           args,
         )
@@ -55,43 +68,56 @@ export class Logger {
     level: ILoggerMessage['level'],
     data: ILoggerMessage['data'],
   ) {
-    if (this.disabled) {
+    // console.log('Logger.message', { data })
+
+    if (
+      this.disabled ||
+      this.parametrs.filterNS?.includes(this.namespace.join('.'))
+    ) {
       return
     }
 
-    Object.values(this.directions).forEach((direction: ILoggerDirection) => {
+    for (const direction of Object.values(this.directions)) {
       direction.act({
-        level,
         data,
+        level,
         namespace: this.namespace,
       })
-    })
-  }
-
-  ns(namespace: INamespaceParam, directionsArgs: ILoggerDirectionsArgs = {}) {
-    return new Logger(
-      this.namespace.concat(namespace),
-      shallowMerge(this.directionsArgs, directionsArgs),
-    )
-  }
-
-  log(level: LoggerLevel, ...args: ILoggerMessage['data']) {
-    this.message(level, args)
+    }
   }
 
   debug(...args: ILoggerMessage['data']) {
     this.message(LoggerLevel.DEBUG, args)
   }
 
+  error(...args: ILoggerMessage['data']) {
+    this.message(LoggerLevel.ERROR, args)
+  }
+
   info(...args: ILoggerMessage['data']) {
     this.message(LoggerLevel.INFO, args)
   }
 
-  warn(...args: ILoggerMessage['data']) {
-    this.message(LoggerLevel.WARN, args)
+  log(level: LoggerLevel, ...args: ILoggerMessage['data']) {
+    this.message(level, args)
   }
 
-  error(...args: ILoggerMessage['data']) {
-    this.message(LoggerLevel.ERROR, args)
+  ns(
+    namespace: INamespaceParameter,
+    directionsArguments: ILoggerDirectionsArguments = {},
+  ) {
+    // console.log('Logger.ns', { namespace })
+
+    const ns: string[] = [...this.namespace, ...toArray(namespace)]
+
+    return new Logger(
+      ns,
+      shallowMerge(this.directionsArguments, directionsArguments),
+      this.parametrs,
+    )
+  }
+
+  warn(...args: ILoggerMessage['data']) {
+    this.message(LoggerLevel.WARN, args)
   }
 }

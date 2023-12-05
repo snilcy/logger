@@ -1,6 +1,7 @@
 console.clear()
 
 import express from 'express'
+
 import { express as loggerExpress } from '../src/index.js'
 
 const app = express()

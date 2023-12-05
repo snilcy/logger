@@ -14,21 +14,21 @@ export enum LoggerLevel {
 
 export const LoggerMethodsMap = {
   [LoggerLevel.DEBUG]: 'debug',
-  [LoggerLevel.INFO] : 'info',
-  [LoggerLevel.WARN] : 'warn',
   [LoggerLevel.ERROR]: 'error',
+  [LoggerLevel.INFO]: 'info',
+  [LoggerLevel.WARN]: 'warn',
 }
 
 export const LoggerSymbolMap = {
   [LoggerLevel.DEBUG]: 'D',
-  [LoggerLevel.INFO] : 'I',
-  [LoggerLevel.WARN] : 'W',
   [LoggerLevel.ERROR]: 'E',
+  [LoggerLevel.INFO]: 'I',
+  [LoggerLevel.WARN]: 'W',
 }
 
 export const LoggerColorMap = {
   [LoggerLevel.DEBUG]: chalk.magenta,
-  [LoggerLevel.INFO] : chalk.blue,
-  [LoggerLevel.WARN] : chalk.yellow,
   [LoggerLevel.ERROR]: chalk.red,
+  [LoggerLevel.INFO]: chalk.blue,
+  [LoggerLevel.WARN]: chalk.yellow,
 }

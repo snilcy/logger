@@ -1,7 +1,7 @@
 import { LoggerLevel } from './const.js'
 
 export interface ILoggerMessage {
-  level    : LoggerLevel
-  data     : any
+  data: any
+  level: LoggerLevel
   namespace: string[]
 }
