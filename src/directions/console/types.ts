@@ -2,6 +2,7 @@ import { ILoggerMessage } from '../../types'
 
 export interface IConsoleDirectionOptions {
   align?: boolean
+  browser?: boolean
   color?: boolean
   deep?: number
   excludeKeys?: string[]
@@ -11,6 +12,7 @@ export interface IConsoleDirectionOptions {
   keys?: string[]
   length?: boolean
   lineTerminators?: boolean
+  node?: boolean
   oneline?: boolean
   only?: string[]
   prefix?: string

@@ -2,14 +2,16 @@
 import {
   getConstructorName,
   isArray,
+  isBrowserEnvironment,
   isError,
+  isNodeEnvironment,
   isNull,
   isUndefined,
   shallowMerge,
 } from '@snilcy/cake'
 import { Chalk } from 'chalk'
 
-import { LoggerColorMap } from '../../const'
+import { LoggerColorMap, LoggerMethodsMap } from '../../const'
 
 import { DEFAULT_OPTIONS, LINE_TERMINATORS_MAP, SHIFT } from './const'
 
@@ -44,6 +46,15 @@ export class ConsoleDirection implements ILoggerDirection {
   }
 
   act(body: ILoggerMessage) {
+    if (!this.options.browser && isBrowserEnvironment()) return
+    if (!this.options.node && isNodeEnvironment()) return
+
+    if (isBrowserEnvironment()) {
+      const level = LoggerMethodsMap[body.level]
+      console[level]([...body.namespace, body.data[0]].join('.'), body.data[1])
+      return
+    }
+
     const content = this.format(body)
     console.log(content)
   }

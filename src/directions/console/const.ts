@@ -15,6 +15,7 @@ export const LINE_TERMINATORS_MAP: Record<string, string> = {
 
 export const DEFAULT_OPTIONS: Required<IConsoleDirectionOptions> = {
   align: false,
+  browser: true,
   color: true,
   deep: MAX_DEEP_DEFAULT,
   excludeKeys: [],
@@ -24,6 +25,7 @@ export const DEFAULT_OPTIONS: Required<IConsoleDirectionOptions> = {
   keys: [],
   length: false,
   lineTerminators: false,
+  node: true,
   oneline: false,
   only: [],
   prefix: '->',

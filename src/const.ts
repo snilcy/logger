@@ -17,14 +17,14 @@ export const LoggerMethodsMap = {
   [LoggerLevel.ERROR]: 'error',
   [LoggerLevel.INFO]: 'info',
   [LoggerLevel.WARN]: 'warn',
-}
+} as const
 
 export const LoggerSymbolMap = {
   [LoggerLevel.DEBUG]: 'D',
   [LoggerLevel.ERROR]: 'E',
   [LoggerLevel.INFO]: 'I',
   [LoggerLevel.WARN]: 'W',
-}
+} as const
 
 export const LoggerColorMap = {
   [LoggerLevel.DEBUG]: chalk.magenta,
