@@ -6,6 +6,7 @@ import {
   isError,
   isNodeEnvironment,
   isNull,
+  isObject,
   isUndefined,
   shallowMerge,
 } from '@snilcy/cake'
@@ -119,7 +120,7 @@ export class ConsoleDirection implements ILoggerDirection {
           result.push(Object.getPrototypeOf(functionToColorize).name)
         }
 
-        return chalk.magenta(result.filter(Boolean).join(' <  '))
+        return chalk.magenta(result.filter(Boolean).join(' extends  '))
       },
       null: () => chalk.red('null'),
       number: (numberToColorize: number) => chalk.blue(numberToColorize),
@@ -158,12 +159,7 @@ export class ConsoleDirection implements ILoggerDirection {
             continue
           }
 
-          let resultValue = ConsoleDirection.stringify(
-            value,
-            shallowMerge(options, { keys: optionsKeys }),
-            currentDeep + 1,
-            objectCache,
-          )
+          let resultValue
 
           if (
             options.excludePath &&
@@ -173,7 +169,16 @@ export class ConsoleDirection implements ILoggerDirection {
           } else if (options.excludeKeys && options.excludeKeys.includes(key)) {
             resultValue = chalk.gray('excludeKeys')
           } else {
-            objectCache.set(data, true)
+            resultValue = ConsoleDirection.stringify(
+              value,
+              shallowMerge(options, { keys: optionsKeys }),
+              currentDeep + 1,
+              objectCache,
+            )
+
+            if (isObject(value)) {
+              objectCache.set(value, true)
+            }
           }
 
           props.push(
