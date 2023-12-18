@@ -1,4 +1,5 @@
 import { deepMerge, isArray, shallowMerge, toArray } from '@snilcy/cake'
+import callsites from 'callsites'
 
 import { LoggerLevel } from './const.js'
 import { ConsoleDirection } from './directions/index.js'
@@ -12,6 +13,7 @@ type ILoggerDirectionsType = typeof LoggerDirections
 
 interface ILoggerParameters {
   filterNS?: string[]
+  global?: boolean
 }
 
 type ILoggerDirectionsArguments = {
@@ -33,16 +35,17 @@ export class Logger {
   private directionsArguments: ILoggerDirectionsArguments = {}
   private disabled = false
   private namespace: string[] = []
-  private parametrs: ILoggerParameters = { filterNS: [] }
+  private parametrs: ILoggerParameters = {
+    filterNS: [],
+    global: false,
+  }
 
   constructor(
     namespace: INamespaceParameter,
     directionsArguments: ILoggerDirectionsArguments,
     parameters: ILoggerParameters = {},
   ) {
-    this.namespace = (isArray(namespace) ? namespace : [namespace]).filter(
-      Boolean,
-    )
+    this.namespace = toArray(namespace).filter(Boolean)
     this.directionsArguments = directionsArguments
     this.parametrs = shallowMerge(this.parametrs, parameters)
 
@@ -68,8 +71,6 @@ export class Logger {
     level: ILoggerMessage['level'],
     data: ILoggerMessage['data'],
   ) {
-    // console.log('Logger.message', { data })
-
     if (
       this.disabled ||
       this.parametrs.filterNS?.includes(this.namespace.join('.'))
@@ -77,11 +78,26 @@ export class Logger {
       return
     }
 
+    const callsitesList = callsites()
+
+    const functionName = callsitesList.map((callsite) =>
+      callsite.getFunctionName(),
+    )[2]
+
+    const fileName = callsitesList.map((callsite) => callsite.getFileName())[2]
+
+    const globalNamespace = this.parametrs.global
+      ? ([
+          fileName && fileName.slice(process.cwd().length + 1),
+          functionName,
+        ].filter(Boolean) as string[])
+      : []
+
     for (const direction of Object.values(this.directions)) {
       direction.act({
         data,
         level,
-        namespace: this.namespace,
+        namespace: [...globalNamespace, ...this.namespace],
       })
     }
   }

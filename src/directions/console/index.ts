@@ -21,6 +21,8 @@ import type { ILoggerDirection } from '../types'
 
 import type { IConsoleDirectionOptions } from './types'
 
+const globalChalk = new Chalk()
+
 export class ConsoleDirection implements ILoggerDirection {
   private options: Required<IConsoleDirectionOptions> = DEFAULT_OPTIONS
 
@@ -38,7 +40,7 @@ export class ConsoleDirection implements ILoggerDirection {
 
     return [
       LoggerColorMap[level](this.options.prefix),
-      namespace,
+      globalChalk.magenta(namespace.join(' ')),
       ConsoleDirection.stringify(data, this.options),
     ]
       .filter(Boolean)
